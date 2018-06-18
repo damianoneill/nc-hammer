@@ -1,0 +1,45 @@
+iterations: 10
+clients: 7
+rampup: 0
+configs:
+- hostname: 10.0.0.1
+  port: 830
+  username: uname
+  password: pass
+  reuseconnection: false
+- hostname: 10.0.0.2
+  port: 830
+  username: uname
+  password: pass
+  reuseconnection: true
+blocks:
+- type: init
+  actions:
+  - netconf:
+      hostname: 10.0.0.1
+      operation: edit-config
+      target: running
+      config: <top xmlns="http://example.com/schema/1.2/config"><protocols><ospf><area><name>0.0.0.0</name><interfaces><interface
+        xc:operation="delete"><name>192.0.2.4</name></interface></interfaces></area></ospf></protocols></top>
+- type: concurrent
+  actions:
+  - netconf:
+      hostname: 10.0.0.1
+      operation: get
+  - netconf:
+      hostname: 10.0.0.2
+      operation: get
+      filter:
+        type: subtree
+        select: <users/>
+- type: sequential
+  actions:
+  - netconf:
+      hostname: 10.0.0.1
+      operation: get-config
+  - Sleep:
+      duration: 5
+  - netconf:
+      hostname: 10.0.0.1
+      operation: get-config
+      Source: running
