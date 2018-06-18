@@ -20,7 +20,7 @@ The suite configuration defines the top-level setup for a Test Suite, this inclu
 * The number of concurrent clients that should connect to each Host
 * A rampup time for the client connections
 
-These permutations allow you to do both functional (iternations:1 and concurrent:1) and load (councurrent:n, where n>1) testing.
+These permutations allow you to do both functional (iterations:1 and concurrent:1) and load (concurrent:n, where n>1) testing.
 
 ### Host Configuration
 
