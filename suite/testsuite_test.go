@@ -118,7 +118,7 @@ func TestNewTestSuite(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{"file not present", args{"doesnt-exist.txt"}, nil, true},
-		{"file present, no content", args{"testdata/emptytestsuite.yml"}, &emptyTs, true},
+		{"file present, no content", args{"testdata/emptytestsuite.yml"}, nil, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -175,4 +175,25 @@ func Test_StringInSlice(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInlineXML(t *testing.T) {
+
+	ts, err := suite.NewTestSuite("testdata/inline.yml")
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	inline := "<top xmlns=\"http://example.com/schema/1.2/config\"><protocols><ospf><area><name>0.0.0.0</name><interfaces><interface operation=\"delete\"><name>192.0.2.4</name></interface></interfaces></area></ospf></protocols></top>"
+	if *ts.Blocks[0].Actions[0].Netconf.Config != inline {
+		t.Errorf("Expected %v got %v", inline, *ts.Blocks[0].Actions[0].Netconf.Config)
+	}
+
+	if *ts.Blocks[0].Actions[1].Netconf.Config != "<users/>" {
+		t.Errorf("Expected %v got %v", "<users/>", *ts.Blocks[0].Actions[0].Netconf.Config)
+	}
+
+	if *ts.Blocks[0].Actions[2].Netconf.Config != inline {
+		t.Errorf("Expected %v got %v", inline, *ts.Blocks[0].Actions[2].Netconf.Config)
+	}
+
 }

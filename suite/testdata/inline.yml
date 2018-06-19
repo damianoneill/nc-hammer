@@ -1,0 +1,27 @@
+iterations: 10
+clients: 7
+rampup: 0
+configs:
+- hostname: 10.0.0.1
+  port: 830
+  username: uname
+  password: pass
+  reuseconnection: false
+blocks:
+- type: init
+  actions:
+  - netconf:
+      hostname: 10.0.0.1
+      operation: edit-config
+      target: running
+      config: file:testdata/edit-config.xml
+  - netconf:
+      hostname: 10.0.0.1
+      operation: edit-config
+      target: running
+      config: <users/>
+  - netconf:
+      hostname: 10.0.0.1
+      operation: edit-config
+      target: running
+      config: file:testdata/edit-config.xml

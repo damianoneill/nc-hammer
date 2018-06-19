@@ -73,6 +73,34 @@ maps to the following yaml definition in a testsuite
 
 Note that the config yaml tag contains the contents of the xml contained with the <config/> element within the rpc element
 
+To reduce the verbosity of test suites the config attribute in the YAML file can be overriden to refer to an external XML file that should have its contents inlined.  For e.g. a XML file such as
+
+```sh
+$ cat edit-config.xml
+<top xmlns="http://example.com/schema/1.2/config"><protocols><ospf><area><name>0.0.0.0</name><interfaces><interface operation="delete"><name>192.0.2.4</name></interface></interfaces></area></ospf></protocols></top>
+```
+
+can be referenced in the YAML as
+
+```yaml
+- netconf:
+    hostname: 10.0.0.1
+    operation: edit-config
+    target: running
+    config: file:edit-config.xml
+```
+
+When running the testsuite the content in the XML file will be inlined as if it had been defined as:
+
+```yaml
+- netconf:
+    hostname: 10.0.0.1
+    operation: edit-config
+    target: running
+    config: <top xmlns="http://example.com/schema/1.2/config"><protocols><ospf><area><name>0.0.0.0</name><interfaces><interface
+      xc:operation="delete"><name>192.0.2.4</name></interface></interfaces></area></ospf></protocols></top>
+```
+
 #### Init
 
 An init block is used to initialise the SUT, this is optional and is not required to execute a test suite.  If more than one init block is defined, the first one in the list is used.  The init block is executed once (regardless of number of clients or number of iterations), on suite startup before any other block is executed.

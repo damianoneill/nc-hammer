@@ -1,0 +1,1 @@
+<top xmlns="http://example.com/schema/1.2/config"><protocols><ospf><area><name>0.0.0.0</name><interfaces><interface operation="delete"><name>192.0.2.4</name></interface></interfaces></area></ospf></protocols></top>

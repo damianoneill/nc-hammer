@@ -4,6 +4,8 @@ import (
 	"errors"
 	"io/ioutil"
 	"log"
+	"os"
+	"strings"
 
 	"github.com/beevik/etree"
 	yaml "gopkg.in/yaml.v2"
@@ -82,13 +84,69 @@ func NewTestSuite(file string) (*TestSuite, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	var ts TestSuite
 	err = yaml.Unmarshal(yamlFile, &ts)
 	if err == nil {
 		err = validateTestSuite(&ts)
+		if err != nil {
+			return nil, err
+		}
 	}
+	// inline any embedded xml
+	err = InlineXML(&ts)
+	if err != nil {
+		return nil, err
+	}
+
 	ts.File = file
 	return &ts, err
+}
+
+var snippets map[string]*string
+
+// InlineXML iterates over a testsuite looking for inline file tag, on finding
+// it will attempt to load and replace with inline xml
+func InlineXML(ts *TestSuite) error {
+	snippets = make(map[string]*string)
+
+	for _, block := range ts.Blocks {
+		for _, action := range block.Actions {
+			if action.Netconf != nil {
+				switch action.Netconf.Operation {
+				case "edit-config":
+					if action.Netconf.Config != nil {
+						if strings.HasPrefix(*action.Netconf.Config, "file:") {
+							if _, ok := snippets[*action.Netconf.Config]; !ok {
+								// first time reading file and store in map
+								b, err := readXMLSnippet(strings.SplitAfter(*action.Netconf.Config, "file:")[1])
+								if err != nil {
+									return err
+								}
+								inline := string(b)
+								snippets[*action.Netconf.Config] = &inline
+
+							}
+							action.Netconf.Config = snippets[*action.Netconf.Config]
+						}
+					}
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func readXMLSnippet(filename string) ([]byte, error) {
+	xmlFile, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	// nolint
+	defer xmlFile.Close()
+
+	XMLdata, err := ioutil.ReadAll(xmlFile)
+	return XMLdata, err
 }
 
 // ToXMLString generates a XML representation of the information provided in the Netconf section of the TestSuite
@@ -172,19 +230,9 @@ func validateTestSuite(ts *TestSuite) error {
 		return errors.New("Testsuite should contain at least one SSH Config section")
 	}
 
-	var hosts []string
-
-	for _, sshconfig := range ts.Configs {
-		if sshconfig.Hostname == "" {
-			return errors.New("ssh config: hostname cannot be empty")
-		}
-		if sshconfig.Username == "" {
-			return errors.New("ssh config: username cannot be empty")
-		}
-		if sshconfig.Password == "" {
-			return errors.New("ssh config: password cannot be empty")
-		}
-		hosts = append(hosts, sshconfig.Hostname)
+	hosts, err := validateSSHConfig(ts)
+	if err != nil {
+		return err
 	}
 
 	for _, block := range ts.Blocks {
@@ -201,6 +249,23 @@ func validateTestSuite(ts *TestSuite) error {
 		}
 	}
 	return nil
+}
+
+func validateSSHConfig(ts *TestSuite) ([]string, error) {
+	var hosts []string
+	for _, sshconfig := range ts.Configs {
+		if sshconfig.Hostname == "" {
+			return nil, errors.New("ssh config: hostname cannot be empty")
+		}
+		if sshconfig.Username == "" {
+			return nil, errors.New("ssh config: username cannot be empty")
+		}
+		if sshconfig.Password == "" {
+			return nil, errors.New("ssh config: password cannot be empty")
+		}
+		hosts = append(hosts, sshconfig.Hostname)
+	}
+	return hosts, nil
 }
 
 // StringInSlice helper function to test if a slice contains a value
