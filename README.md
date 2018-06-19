@@ -73,7 +73,7 @@ maps to the following yaml definition in a testsuite
 
 Note that the config yaml tag contains the contents of the xml contained with the <config/> element within the rpc element
 
-To reduce the verbosity of test suites the config attribute in the YAML file can be overriden to refer to an external XML file that should have its contents inlined.  For e.g. a XML file such as
+To reduce the verbosity of test suites the config attribute in the YAML file can be overriden to refer to an external XML file that should have its contents inlined using the __file:__ identifier.  For e.g. an XML file such as
 
 ```sh
 $ cat edit-config.xml

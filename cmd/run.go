@@ -39,7 +39,7 @@ func runTestSuite(ts *suite.TestSuite) {
 	// handle results in separate goroutine
 	resultChannel := make(chan result.NetconfResult)
 	handleResultsFinished := make(chan bool)
-	go result.HandleResults(resultChannel, handleResultsFinished, ts.File)
+	go result.HandleResults(resultChannel, handleResultsFinished, ts)
 
 	// check first for an init block, this runs at the start, actions are sequential, it only runs once
 	// if the tester has specified more than one init block, these are ignored

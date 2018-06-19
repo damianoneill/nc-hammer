@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/beevik/etree"
+	"github.com/tdewolff/minify"
+	"github.com/tdewolff/minify/xml"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -109,7 +111,8 @@ var snippets map[string]*string
 // it will attempt to load and replace with inline xml
 func InlineXML(ts *TestSuite) error {
 	snippets = make(map[string]*string)
-
+	m := minify.New()
+	m.AddFunc("text/xml", xml.Minify)
 	for _, block := range ts.Blocks {
 		for _, action := range block.Actions {
 			if action.Netconf != nil {
@@ -123,7 +126,10 @@ func InlineXML(ts *TestSuite) error {
 								if err != nil {
 									return err
 								}
-								inline := string(b)
+								inline, err := m.String("text/xml", string(b))
+								if err != nil {
+									return err
+								}
 								snippets[*action.Netconf.Config] = &inline
 
 							}

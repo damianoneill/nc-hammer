@@ -2,13 +2,14 @@ package result
 
 import (
 	"fmt"
-	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/damianoneill/nc-hammer/suite"
 	"github.com/gocarina/gocsv"
+	yaml "gopkg.in/yaml.v2"
 )
 
 // NetconfResult used to store all data related to a NETCONF requests response
@@ -23,7 +24,7 @@ type NetconfResult struct {
 }
 
 // HandleResults processes results as they occur
-func HandleResults(resultChannel chan NetconfResult, handleResultsFinished chan bool, testSuiteFile string) {
+func HandleResults(resultChannel chan NetconfResult, handleResultsFinished chan bool, ts *suite.TestSuite) {
 	// sit here collecting results until the channel is closed by the main go routine
 	results := []NetconfResult{}
 	for result := range resultChannel {
@@ -34,7 +35,7 @@ func HandleResults(resultChannel chan NetconfResult, handleResultsFinished chan 
 	}
 
 	// store results for future processing
-	err := ArchiveResults(results, testSuiteFile)
+	err := ArchiveResults(results, ts)
 	if err != nil {
 		panic(err)
 	}
@@ -43,7 +44,7 @@ func HandleResults(resultChannel chan NetconfResult, handleResultsFinished chan 
 }
 
 // ArchiveResults stores results for future processing
-func ArchiveResults(results []NetconfResult, testSuiteFile string) error {
+func ArchiveResults(results []NetconfResult, ts *suite.TestSuite) error {
 	// create the output directory based on current timestamp
 	now := time.Now().Format("2006-01-02-15-04-05")
 	path := filepath.Join("./results", now)
@@ -66,21 +67,12 @@ func ArchiveResults(results []NetconfResult, testSuiteFile string) error {
 		return err
 	}
 
-	// copy the original testsuite file for archiving with the results
-	from, err := os.Open(testSuiteFile)
+	// write the TestSuite, which included any xml files inlined.
+	bytes, err := yaml.Marshal(&ts)
 	if err != nil {
 		return err
 	}
-	// nolint
-	defer from.Close()
-	to, err := os.OpenFile(filepath.Join(path, "test-suite.yml"), os.O_RDWR|os.O_CREATE, 0600)
-	if err != nil {
-		return err
-	}
-	// nolint
-	defer to.Close()
-	_, err = io.Copy(to, from)
-
+	err = ioutil.WriteFile(filepath.Join(path, "test-suite.yml"), bytes, 0644)
 	return err
 }
 
