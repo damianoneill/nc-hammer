@@ -119,7 +119,6 @@ func TestNewTestSuite(t *testing.T) {
 		// TODO: Add test cases.
 		{"file not present", args{"doesnt-exist.txt"}, nil, true},
 		{"file present, no content", args{"testdata/emptytestsuite.yml"}, &emptyTs, true},
-		//{"valid test suite", args{"testdata/testsuite.yml"}, &emptyTs, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -153,4 +152,27 @@ func TestTestSuite_GetInitBlock(t *testing.T) {
 	block := got.GetInitBlock()
 	assert.NotNil(t, block)
 	assert.Equal(t, block.Actions[0].Netconf.Operation, "edit-config", "they should be equal")
+}
+
+func Test_StringInSlice(t *testing.T) {
+	type args struct {
+		a    string
+		list []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want bool
+	}{
+		// TODO: Add test cases.
+		{"valid", args{"a", []string{"a", "b"}}, true},
+		{"invalid", args{"a", []string{"b", "c"}}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := suite.StringInSlice(tt.args.a, tt.args.list); got != tt.want {
+				t.Errorf("stringInSlice() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

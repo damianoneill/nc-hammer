@@ -171,6 +171,9 @@ func validateTestSuite(ts *TestSuite) error {
 	if len(ts.Configs) == 0 {
 		return errors.New("Testsuite should contain at least one SSH Config section")
 	}
+
+	var hosts []string
+
 	for _, sshconfig := range ts.Configs {
 		if sshconfig.Hostname == "" {
 			return errors.New("ssh config: hostname cannot be empty")
@@ -181,15 +184,31 @@ func validateTestSuite(ts *TestSuite) error {
 		if sshconfig.Password == "" {
 			return errors.New("ssh config: password cannot be empty")
 		}
+		hosts = append(hosts, sshconfig.Hostname)
 	}
+
 	for _, block := range ts.Blocks {
 		for _, action := range block.Actions {
 			if action.Netconf != nil {
 				if action.Netconf.Operation == "" {
 					return errors.New("netconf: operation cannot be empty")
 				}
+				if !StringInSlice(action.Netconf.Hostname, hosts) {
+					return errors.New("netconf: operation has to use a host defined in the configs section")
+				}
 			}
+
 		}
 	}
 	return nil
+}
+
+// StringInSlice helper function to test if a slice contains a value
+func StringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }

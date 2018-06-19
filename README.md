@@ -151,7 +151,7 @@ Total Number of Errors for suite: 2
 
 ## Build
 
-You should have a working go environment, packages are managed by [vgo](https://github.com/golang/go/wiki/vgo-user-guide).
+You should have a working go environment, packages are managed by [vgo](https://github.com/golang/go/wiki/vgo-user-guide).  This includes support for at least go v1.10.x.
 
 ```sh
 go get -u golang.org/x/vgo
