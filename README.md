@@ -54,11 +54,28 @@ A concurrent block contains a set of actions that are executed concurrently.  No
 
 Some NETCONF Actions require defining snippets of XML for e.g. in the edit-config operation, any XML included in TestSuite should be minified, this can be simplified by using an [online minifier](http://www.webtoolkitonline.com/xml-minifier.html).
 
+For e.g. 
+
+```
+<top xmlns="http://example.com/schema/1.2/config">
+   <interface>
+      <name>Ethernet0/0</name>
+      <mtu>1500</mtu>
+   </interface>
+</top>
+```
+
+would become
+
+```
+<top xmlns="http://example.com/schema/1.2/config"><interface><name>Ethernet0/0</name><mtu>1500</mtu></interface></top>
+```
+
 ## Usage
 
 ```sh
 $ nc-hammer
-A NETCONF Load Tester
+A NETCONF Load Tester d
 
 Usage:
   nc-hammer [command]
