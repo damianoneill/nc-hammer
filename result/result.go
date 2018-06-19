@@ -45,7 +45,7 @@ func HandleResults(resultChannel chan NetconfResult, handleResultsFinished chan 
 // ArchiveResults stores results for future processing
 func ArchiveResults(results []NetconfResult, testSuiteFile string) error {
 	// create the output directory based on current timestamp
-	now := time.Now().Format("2006-01-02-15:04:05")
+	now := time.Now().Format("2006-01-02-15-04-05")
 	path := filepath.Join("./results", now)
 	err := os.MkdirAll(path, os.ModePerm)
 	if err != nil {

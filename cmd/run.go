@@ -49,6 +49,8 @@ func runTestSuite(ts *suite.TestSuite) {
 		}
 	}
 
+	log.Printf(" > %d client(s), %d iterations per client, %d seconds wait between starting each client\n", ts.Clients, ts.Iterations, ts.Rampup)
+
 	// create concurrent sessions for each of the defined clients
 	clientWg := sync.WaitGroup{}
 	for cID := 0; cID < ts.Clients; cID++ {
@@ -58,7 +60,6 @@ func runTestSuite(ts *suite.TestSuite) {
 		var waitDuration = float32(ts.Rampup) / float32(ts.Clients)
 		time.Sleep(time.Duration(int(1000*waitDuration)) * time.Millisecond)
 	}
-	log.Printf(" > %d client(s) started, %d iterations per client, %d seconds wait between starting each client\n", ts.Clients, ts.Iterations, ts.Rampup)
 	clientWg.Wait()
 
 	// close the results channel and wait for the results goroutine to finish
