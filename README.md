@@ -36,7 +36,7 @@ The host configuration defines the parameters required to make a SSH connection 
 
 ### Blocks Configuration
 
-The blocks' configuration contains the defintion of the sequence of requests (an action) that should be executed against your SUT.  The blocks section contains a list of block definitions, __the list is executed sequentially__.  Each block section defines the type of block it is, options include; init, sequential or concurrent.  The blocks themselves contain a list of actions, currently two action types are supported; netconf and sleep.
+The blocks' configuration contains the defintion of the sequence of requests (an action) that should be executed against your SUT.  The blocks section contains a list of block definitions, __the list is executed sequentially per client__.  Each block section defines the type of block it is, options include; init, sequential or concurrent.  The blocks themselves contain a list of actions, currently two action types are supported; netconf and sleep.
 
 #### Init
 
@@ -49,6 +49,10 @@ A sequential block is a set of actions that are executed sequentially.  An assum
 #### Concurrent
 
 A concurrent block contains a set of actions that are executed concurrently.  No assumption should be made with regard to ordering in this block type.
+
+### Handling XML
+
+Some NETCONF Actions require defining snippets of XML for e.g. in the edit-config operation, any XML included in TestSuite should be minified, this can be simplified by using an [online minifier](http://www.webtoolkitonline.com/xml-minifier.html).
 
 ## Usage
 
