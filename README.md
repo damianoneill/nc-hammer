@@ -38,6 +38,41 @@ The host configuration defines the parameters required to make a SSH connection 
 
 The blocks' configuration contains the defintion of the sequence of requests (an action) that should be executed against your SUT.  The blocks section contains a list of block definitions, __the list is executed sequentially per client__.  Each block section defines the type of block it is, options include; init, sequential or concurrent.  The blocks themselves contain a list of actions, currently two action types are supported; netconf and sleep.
 
+A netconf Action is a definition for a NETCONF operation.  The NETCONF operations that are supported are [get](https://tools.ietf.org/html/rfc6241#page-48), [get-config](https://tools.ietf.org/html/rfc6241#page-35) and [edit-config](https://tools.ietf.org/html/rfc6241#page-37).  The parameters that are available for each netconf action reflect the parameters defined in the [NETCONF Specification](https://tools.ietf.org/html/rfc6241).  
+
+For e.g. the NETCONF RPC message containing an edit-config operation
+
+```xml
+<rpc xmlns="urn:ietf:params:xml:ns:netconf:base:1.0" message-id="101">
+   <edit-config>
+      <target>
+         <running />
+      </target>
+      <config>
+         <top xmlns="http://example.com/schema/1.2/config">
+            <interface>
+               <name>Ethernet0/0</name>
+               <mtu>1500</mtu>
+            </interface>
+         </top>
+      </config>
+   </edit-config>
+</rpc>
+```
+
+maps to the following yaml definition in a testsuite
+
+```yaml
+- netconf:
+    hostname: 10.0.0.1
+    operation: edit-config
+    target: running
+    config: <top xmlns="http://example.com/schema/1.2/config"><protocols><ospf><area><name>0.0.0.0</name><interfaces><interface
+      xc:operation="delete"><name>192.0.2.4</name></interface></interfaces></area></ospf></protocols></top>
+```
+
+Note that the config yaml tag contains the contents of the xml contained with the <config/> element within the rpc element
+
 #### Init
 
 An init block is used to initialise the SUT, this is optional and is not required to execute a test suite.  If more than one init block is defined, the first one in the list is used.  The init block is executed once (regardless of number of clients or number of iterations), on suite startup before any other block is executed.

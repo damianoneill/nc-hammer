@@ -34,6 +34,7 @@ var runCmd = &cobra.Command{
 func runTestSuite(ts *suite.TestSuite) {
 	start := time.Now()
 	log.Printf("Testsuite %v started at %v\n", ts.File, start.Format("Mon Jan _2 15:04:05 2006"))
+	log.Printf(" > %d client(s), %d iterations per client, %d seconds wait between starting each client\n", ts.Clients, ts.Iterations, ts.Rampup)
 
 	// handle results in separate goroutine
 	resultChannel := make(chan result.NetconfResult)
@@ -48,9 +49,6 @@ func runTestSuite(ts *suite.TestSuite) {
 			action.Execute(start, 0, ts, a, resultChannel)
 		}
 	}
-
-	log.Printf(" > %d client(s), %d iterations per client, %d seconds wait between starting each client\n", ts.Clients, ts.Iterations, ts.Rampup)
-
 	// create concurrent sessions for each of the defined clients
 	clientWg := sync.WaitGroup{}
 	for cID := 0; cID < ts.Clients; cID++ {
