@@ -4,6 +4,8 @@
 [![Go Report Card](https://goreportcard.com/badge/damianoneill/nc-hammer)](http://goreportcard.com/report/damianoneill/nc-hammer)
 [![license](https://img.shields.io/github/license/damianoneill/nc-hammer.svg)](https://github.com/damianoneill/nc-hammer/blob/master/LICENSE)
 
+If you don't have a Go evnironment setup, you can __dowload a binary__ from the [releases](https://github.com/damianoneill/nc-hammer/releases) page.
+
 The tool uses a yaml file to define the test setup.  A sample [Test Suite](./suite/testdata/testsuite.yml) is included in the repository.
 
 ## Test Suite
@@ -36,15 +38,15 @@ The host configuration defines the parameters required to make a SSH connection 
 
 The blocks' configuration contains the defintion of the sequence of requests (an action) that should be executed against your SUT.  The blocks section contains a list of block definitions, __the list is executed sequentially__.  Each block section defines the type of block it is, options include; init, sequential or concurrent.  The blocks themselves contain a list of actions, currently two action types are supported; netconf and sleep.
 
-#### Init Block
+#### Init
 
 An init block is used to initialise the SUT, this is optional and is not required to execute a test suite.  If more than one init block is defined, the first one in the list is used.  The init block is executed once (regardless of number of clients or number of iterations), on suite startup before any other block is executed.
 
-#### Sequential Block
+#### Sequential
 
 A sequential block is a set of actions that are executed sequentially.  An assumption can be made with regard to ordering in this block type.
 
-#### Concurrent Block
+#### Concurrent
 
 A concurrent block contains a set of actions that are executed concurrently.  No assumption should be made with regard to ordering in this block type.
 
@@ -74,31 +76,56 @@ Use "nc-hammer [command] --help" for more information about a command.
 
 ## Example Usage
 
+A Test Suite run can be executed as follows, note that as the suite runs, it will write a '.' to the screen to indicate a succesful NETCONF Request and a 'E' to indicate an Error.
+
 ```sh
-nc-hammer run test-suite.yml
+$ ./nc-hammer run ~/test-suite.yml
+Testsuite /Users/doneill/test-suite.yml started at Tue Jun 19 10:55:33 2018
+ > 5 client(s) started, 10 iterations per client, 0 seconds wait between starting each client
+.................E................E...............
+Testsuite completed in 22.369465719s
 ```
 
 After completion of a testsuite, an output folder with the date timestamp will be created in a folder called results.
 
 ```sh
 $ ls results
-2018-06-18-12:19:39
+2018-06-19-10:55:55
 ```
 
 You can analyse the results as follows:
 
 ```sh
-nc-hammer analyse results/2018-06-18-11:10:18/
+$ ./nc-hammer analyse results/2018-06-19-10:55:55/
 
-Testsuite executed at 2018-06-18-11:10:18
-Suite defined the following hosts: [172.26.138.50 172.26.138.118 172.26.138.53 172.26.138.46]
-5 client(s) started, 20 iterations per client, 0 seconds wait between starting each client
-Total execution time: 43.596s, Suite execution contained 6 errors
+Testsuite executed at 2018-06-19-10:55:55
+Suite defined the following hosts: [172.26.138.50 172.26.138.57 172.26.138.118 172.26.138.53 172.26.138.46]
+5 client(s) started, 10 iterations per client, 0 seconds wait between starting each client
+
+Total execution time: 22.368s, Suite execution contained 2 errors
 
 
  HOST           OPERATION   REUSE CONNECTION  REQUESTS  MEAN     VARIANCE   STD DEVIATION
 
- 172.26.138.50  get-config  false                   94  2172.57  215869.24         464.62
+ 172.26.138.50  get-config  false                   48  2185.17  297421.42         545.36
+
+```
+
+If the results included errors, you can analyse the errors as follows:
+
+```sh
+$ ./nc-hammer analyse error results/2018-06-19-10:55:55/
+
+Testsuite executed at 2018-06-19-10:55:55
+Total Number of Errors for suite: 2
+
+ HOSTNAME       OPERATION   ERROR
+
+ 172.26.138.50  get-config  ssh: handshake failed: ssh: unable to authenticate, attempted methods [none
+                            password], no supported methods remain
+
+ 172.26.138.50  get-config  ssh: handshake failed: ssh: unable to authenticate, attempted methods [none
+                            password], no supported methods remain
 ```
 
 ## Build
