@@ -6,6 +6,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
@@ -40,7 +41,7 @@ var analyseCmd = &cobra.Command{
 
 func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.NetconfResult) {
 	log.Println("")
-	log.Printf("Testsuite executed at %v\n", strings.Split(ts.File, "/")[1])
+	log.Printf("Testsuite executed at %v\n", strings.Split(ts.File, string(filepath.Separator))[1])
 	var hosts []string
 	for _, config := range ts.Configs {
 		hosts = append(hosts, config.Hostname)

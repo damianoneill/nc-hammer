@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/damianoneill/nc-hammer/result"
@@ -33,7 +34,7 @@ var analyseErrorCmd = &cobra.Command{
 
 func analyseErrors(cmd *cobra.Command, ts *suite.TestSuite, results []result.NetconfResult) {
 	log.Println("")
-	log.Printf("Testsuite executed at %v\n", strings.Split(ts.File, "/")[1])
+	log.Printf("Testsuite executed at %v\n", strings.Split(ts.File, string(filepath.Separator))[1])
 
 	sortResults(results)
 
