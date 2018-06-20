@@ -51,8 +51,17 @@ func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 	latencies := make(map[string]map[string][]float64)
 	errCount := orderAndExcludeErrValues(results, latencies)
 
+	// get the largest when time from the results, this is the last action to run
+	var when float64
+	for _, result := range results {
+		if result.When > when {
+			when = result.When
+		}
+	}
+	executionTime := time.Duration(when) * time.Millisecond
+
 	log.Printf("%d client(s) started, %d iterations per client, %d seconds wait between starting each client\n", ts.Clients, ts.Iterations, ts.Rampup)
-	log.Printf("\nTotal execution time: %v, Suite execution contained %v errors", time.Duration(results[len(results)-1].When)*time.Millisecond, errCount)
+	log.Printf("\nTotal execution time: %v, Suite execution contained %v errors", executionTime, errCount)
 
 	log.Println("")
 
@@ -71,14 +80,15 @@ func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 				continue
 			}
 			mean := stat.Mean(latencies, nil)
+			tps := 1000 / mean
 			variance := stat.Variance(latencies, nil)
 			stddev := math.Sqrt(variance)
-			data = append(data, []string{host, operation, strconv.FormatBool(ts.Configs.IsReuseConnection(host)), strconv.Itoa(len(latencies)), fmt.Sprintf("%.2f", mean), fmt.Sprintf("%.2f", variance), fmt.Sprintf("%.2f", stddev)})
+			data = append(data, []string{host, operation, strconv.FormatBool(ts.Configs.IsReuseConnection(host)), strconv.Itoa(len(latencies)), fmt.Sprintf("%.2f", tps), fmt.Sprintf("%.2f", mean), fmt.Sprintf("%.2f", variance), fmt.Sprintf("%.2f", stddev)})
 		}
 	}
 
 	var table = tablewriter.NewWriter(os.Stdout)
-	renderTable(table, []string{"Host", "Operation", "Reuse Connection", "Requests", "Mean", "Variance", "Std Deviation"}, &data)
+	renderTable(table, []string{"Host", "Operation", "Reuse Connection", "Requests", "TPS", "Mean", "Variance", "Std Deviation"}, &data)
 	table.Render()
 }
 
