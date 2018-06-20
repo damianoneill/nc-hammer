@@ -6,7 +6,9 @@
 
 If you don't have a Go evnironment setup, you can __dowload a binary__ from the [releases](https://github.com/damianoneill/nc-hammer/releases) page, I suggest you place this somewhere in an existing bin path.
 
-The tool uses a yaml file to define the test setup.  A sample [Test Suite](./suite/testdata/testsuite.yml) is included in the repository.
+The tool uses a yaml file to define the test setup.  A sample [Test Suite](./suite/testdata/testsuite.yml) is included in the repository.  It generates a results directory containing a copy of the testsuite and its output encoded in CSV format.  The tool can then generate reports against the contents in the results directory.
+
+![alt text](img/arch.png)
 
 ## Test Suite
 
