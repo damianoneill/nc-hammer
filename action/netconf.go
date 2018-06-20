@@ -50,6 +50,7 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 	if session != nil {
 		result.SessionID = session.SessionID
 	} else {
+		fmt.Printf("E")
 		result.Err = "session has expired"
 		resultChannel <- result
 		return
@@ -57,6 +58,7 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 
 	xml, err := action.Netconf.ToXMLString()
 	if err != nil {
+		fmt.Printf("E")
 		result.Err = err.Error()
 		resultChannel <- result
 		return
@@ -66,6 +68,7 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 	start := time.Now()
 	_, err = session.Exec(raw)
 	if err != nil {
+		fmt.Printf("E")
 		result.Err = err.Error()
 		resultChannel <- result
 		return
