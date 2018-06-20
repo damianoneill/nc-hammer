@@ -27,7 +27,6 @@ func CloseAllSessions() {
 
 // ExecuteNetconf invoked when a NETCONF Action is identified
 func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *suite.Sshconfig, resultChannel chan result.NetconfResult) {
-	start := time.Now()
 
 	var result result.NetconfResult
 	result.Client = cID
@@ -63,14 +62,16 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 		return
 	}
 
-	_, err = session.Exec(netconf.RawMethod(xml))
+	raw := netconf.RawMethod(xml)
+	start := time.Now()
+	_, err = session.Exec(raw)
 	if err != nil {
 		result.Err = err.Error()
 		resultChannel <- result
 		return
 	}
-
 	elapsed := time.Since(start)
+
 	result.When = float64(time.Since(tsStart).Nanoseconds() / int64(time.Millisecond))
 	result.Latency = float64(elapsed.Nanoseconds() / int64(time.Millisecond))
 
