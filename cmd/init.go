@@ -63,7 +63,7 @@ func buildTestSuite(path string) *suite.TestSuite {
 	ts.Configs = suite.Configs{suite.Sshconfig{Hostname: "10.0.0.1", Port: 830, Username: "user", Password: "pass", Reuseconnection: false}}
 
 	initBlock := suite.Block{Type: "init", Actions: []suite.Action{}}
-	config := "file:" + filepath.Join(path, "edit-config.xml")
+	config := "file:" + filepath.Join("snippets", "edit-config.xml")
 	editAction := suite.Action{Netconf: &suite.Netconf{Hostname: "10.0.0.1", Operation: "edit-config", Source: nil, Target: nil, Filter: nil, Config: &config}, Sleep: nil}
 	initBlock.Actions = []suite.Action{editAction}
 
