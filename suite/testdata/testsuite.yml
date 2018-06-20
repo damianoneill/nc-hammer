@@ -1,27 +1,27 @@
-iterations: 10
-clients: 7
-rampup: 0
+iterations: 10            # No of Iterations of the blocks section
+clients: 7                # No of concurrent clients
+rampup: 0                 # No of seconds over which to rampup the client connections
 configs:
-- hostname: 10.0.0.1
-  port: 830
+- hostname: 10.0.0.1      # ip address or dns hostname
+  port: 830               # netconf port
   username: uname
   password: pass
-  reuseconnection: false
+  reuseconnection: false  # whether a connection to a device should be reused or not
 - hostname: 10.0.0.2
   port: 830
   username: uname
   password: pass
   reuseconnection: true
 blocks:
-- type: init
+- type: init              # init block type, actions only executed once per testsuite, can be used to configure the sut
   actions:
   - netconf:
       hostname: 10.0.0.1
       operation: edit-config
-      target: running
+      target: running     
       config: <top xmlns="http://example.com/schema/1.2/config"><protocols><ospf><area><name>0.0.0.0</name><interfaces><interface
         xc:operation="delete"><name>192.0.2.4</name></interface></interfaces></area></ospf></protocols></top>
-- type: concurrent
+- type: concurrent        # concurrent block type, individual actions are executed concurrently
   actions:
   - netconf:
       hostname: 10.0.0.1
@@ -32,7 +32,7 @@ blocks:
       filter:
         type: subtree
         select: <users/>
-- type: sequential
+- type: sequential        # sequential block type, individual actions are executed sequentially
   actions:
   - netconf:
       hostname: 10.0.0.1
