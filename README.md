@@ -138,7 +138,7 @@ would become
 
 ```sh
 $ nc-hammer
-A NETCONF Load Tester d
+A NETCONF Load Tester
 
 Usage:
   nc-hammer [command]
@@ -147,8 +147,9 @@ Available Commands:
   analyse     Analyse the output of a Test Suite run
   completion  Generate shell completion script for nc-hammer
   help        Help about any command
+  init        Scaffold a TestSuite and snippets directory
   run         Execute a Test Suite
-  version     Show ./nc-hammer version
+  version     Show nc-hammer version
 
 Flags:
       --config string   config file (default is $HOME/../nc-hammer.yaml)
@@ -159,6 +160,22 @@ Use "nc-hammer [command] --help" for more information about a command.
 ```
 
 ## Example Usage
+
+To simplify the process of getting up and running, the application includes a scaffolding function.  
+
+```sh
+./nc-hammer init scenario1
+```
+
+This will generate a folder called scenario1 that includes a sample TestSuite and an example XML Snippet.
+
+```sh
+$ tree scenario1
+scenario1
+├── snippets
+│   └── edit-config.xml
+└── test-suite.yml
+```
 
 A Test Suite run can be executed as follows, note that as the suite runs, it will write a '.' to the screen to indicate a succesful NETCONF Request and a 'E' to indicate an Error.
 

@@ -37,7 +37,7 @@ blocks:
   - netconf:
       hostname: 10.0.0.1
       operation: get-config
-  - Sleep:
+  - sleep:
       duration: 5
   - netconf:
       hostname: 10.0.0.1
