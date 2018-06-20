@@ -15,7 +15,7 @@ import (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init <directory>",
-	Short: "Scaffold a TestSuite and snippets directory",
+	Short: "Scaffold a Test Suite and snippets directory",
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) != 1 {
 			return errors.New("init command requires a directory as an argument")

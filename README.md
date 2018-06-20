@@ -4,7 +4,7 @@
 [![Go Report Card](https://goreportcard.com/badge/damianoneill/nc-hammer)](http://goreportcard.com/report/damianoneill/nc-hammer)
 [![license](https://img.shields.io/github/license/damianoneill/nc-hammer.svg)](https://github.com/damianoneill/nc-hammer/blob/master/LICENSE)
 
-If you don't have a Go evnironment setup, you can __dowload a binary__ from the [releases](https://github.com/damianoneill/nc-hammer/releases) page.
+If you don't have a Go evnironment setup, you can __dowload a binary__ from the [releases](https://github.com/damianoneill/nc-hammer/releases) page, I suggest you place this somewhere in an existing bin path.
 
 The tool uses a yaml file to define the test setup.  A sample [Test Suite](./suite/testdata/testsuite.yml) is included in the repository.
 
@@ -164,7 +164,7 @@ Use "nc-hammer [command] --help" for more information about a command.
 To simplify the process of getting up and running, the application includes a scaffolding function.  
 
 ```sh
-./nc-hammer init scenario1
+nc-hammer init scenario1
 ```
 
 This will generate a folder called scenario1 that includes a sample TestSuite and an example XML Snippet.
@@ -180,8 +180,8 @@ scenario1
 A Test Suite run can be executed as follows, note that as the suite runs, it will write a '.' to the screen to indicate a succesful NETCONF Request and a 'E' to indicate an Error.
 
 ```sh
-$ ./nc-hammer run ~/test-suite.yml
-Testsuite /Users/doneill/test-suite.yml started at Tue Jun 19 10:55:33 2018
+$ nc-hammer run test-suite.yml
+Testsuite /Users/doneill/scenario1/test-suite.yml started at Tue Jun 19 10:55:33 2018
  > 5 client(s) started, 10 iterations per client, 0 seconds wait between starting each client
 .................E................E...............
 Testsuite completed in 22.369465719s
@@ -197,7 +197,7 @@ $ ls results
 You can analyse the results as follows:
 
 ```sh
-$ ./nc-hammer analyse results/2018-06-19-10:55:55/
+$ nc-hammer analyse results/2018-06-19-10:55:55/
 
 Testsuite executed at 2018-06-19-10:55:55
 Suite defined the following hosts: [172.26.138.50 172.26.138.57 172.26.138.118 172.26.138.53 172.26.138.46]
@@ -215,7 +215,7 @@ Total execution time: 22.368s, Suite execution contained 2 errors
 If the results included errors, you can analyse the errors as follows:
 
 ```sh
-$ ./nc-hammer analyse error results/2018-06-19-10:55:55/
+$ nc-hammer analyse error results/2018-06-19-10:55:55/
 
 Testsuite executed at 2018-06-19-10:55:55
 Total Number of Errors for suite: 2
