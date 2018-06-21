@@ -40,6 +40,8 @@ The host configuration defines the parameters required to make a SSH connection 
 
 The blocks' configuration contains the defintion of the sequence of requests (an action) that should be executed against your SUT.  The blocks section contains a list of block definitions, __the list is executed sequentially per client__.  Each block section defines the type of block it is, options include; init, sequential or concurrent.  The blocks themselves contain a list of actions, currently two action types are supported; netconf and sleep.
 
+A sleep Action is a pause in the execution of a block.  The sleep action defines a duration in Milliseconds.
+
 A netconf Action is a definition for a NETCONF operation.  The NETCONF operations that are supported are [get](https://tools.ietf.org/html/rfc6241#page-48), [get-config](https://tools.ietf.org/html/rfc6241#page-35) and [edit-config](https://tools.ietf.org/html/rfc6241#page-37).  The parameters that are available for each netconf action reflect the parameters defined in the [NETCONF Specification](https://tools.ietf.org/html/rfc6241).  
 
 For e.g. the NETCONF RPC message containing an edit-config operation
