@@ -214,7 +214,9 @@ Total execution time: 22.368s, Suite execution contained 2 errors
 
 ```
 
-If the results included errors, you can analyse the errors as follows:
+As you can see the default analyse option generates the __mean__ (the total of the latencies divided by how many latencies there are), __variance__ (measures how far each latency in the set is from the mean) and __standard devitation__ (is a measure of the extent to which the latency set varies from the mean) for the set of latencies associated with a specific operation against a specific host.
+
+If the results included errors (the latencies for these are excluded from the set of results), you can analyse the errors as follows:
 
 ```sh
 $ nc-hammer analyse error results/2018-06-19-10:55:55/
