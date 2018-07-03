@@ -21,10 +21,10 @@ require (
 	github.com/tdewolff/minify v1.1.0
 	github.com/tdewolff/parse v1.1.0
 	github.com/ziutek/telnet v0.0.0-20180329124119-c3b780dc415b
-	golang.org/x/crypto v0.0.0-20180617042118-027cca12c2d6
-	golang.org/x/sys v0.0.0-20180616030259-6c888cc515d3
+	golang.org/x/crypto v0.0.0-20180621125126-a49355c7e3f8
+	golang.org/x/sys v0.0.0-20180627142611-7138fd3d9dc8
 	golang.org/x/text v0.3.0
-	gonum.org/v1/gonum v0.0.0-20180617212200-5530c0a23a8e
-	gopkg.in/check.v1 v1.0.0-20161208181325-20d25e280405
+	gonum.org/v1/gonum v0.0.0-20180622153253-e9e56344e335
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127
 	gopkg.in/yaml.v2 v2.2.1
 )
