@@ -244,10 +244,11 @@ You should have a working go environment, packages are managed by [vgo](https://
 go get -u golang.org/x/vgo
 ```
 
-After cloning the repository, run vgo build to resolve imports and download the dependent packages.
+There is an issue at the moment with vgo, regarding one of the sub projects version, so for the meantime we use the packages defined in go.mod definition to install the latest into GOPATH for building.
 
 ```sh
-vgo build
+$ vgo list -m | awk '{ print $1 }' | grep -v MODULE | xargs go get -u
+$ go build
 ```
 
 ## Credits
