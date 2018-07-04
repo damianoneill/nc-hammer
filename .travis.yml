@@ -16,7 +16,9 @@ before_script:
   - vgo list -m | awk '{ print $1 }' | grep -v MODULE | xargs go get -u
   - go get -u github.com/alecthomas/gometalinter
   - gometalinter --install
+  - go get -u github.com/mattn/goveralls
 
 script:
   - gometalinter --deadline=60s ./...
-  - go test -v -race ./...  # Run all the tests with the race detector enabled
+  - go test -v -race ./... -coverprofile=coverage.out # Run all the tests with the race detector enabled
+  - goveralls -coverprofile=coverage.out -service travis-ci

@@ -15,3 +15,4 @@ artifacts
 nc-hammer
 results
 dist
+coverage.out
