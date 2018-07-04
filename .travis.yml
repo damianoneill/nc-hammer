@@ -18,5 +18,5 @@ before_script:
   - gometalinter --install
 
 script:
-  - gometalinter ./...
+  - gometalinter --deadline=60s ./...
   - go test -v -race ./...  # Run all the tests with the race detector enabled
