@@ -1,5 +1,6 @@
 # NETCONF Load Tool
 
+[![Build Status](https://travis-ci.org/damianoneill/nc-hammer.svg?branch=master)](https://travis-ci.org/damianoneill/nc-hammer)
 [![GitHub release](https://img.shields.io/github/release/damianoneill/nc-hammer.svg)](https://github.com/damianoneill/nc-hammer/releases)
 [![Go Report Card](https://goreportcard.com/badge/damianoneill/nc-hammer)](http://goreportcard.com/report/damianoneill/nc-hammer)
 [![license](https://img.shields.io/github/license/damianoneill/nc-hammer.svg)](https://github.com/damianoneill/nc-hammer/blob/master/LICENSE)
