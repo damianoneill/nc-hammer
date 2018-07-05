@@ -56,14 +56,3 @@ func TestOrderAndExcludeErrValues(t *testing.T) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 }
-
-func TestAnalyseResults(t *testing.T) {
-	// func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.NetconfResult)
-
-	got := "" //analyseResults
-	want := ""
-
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
-	}
-}
