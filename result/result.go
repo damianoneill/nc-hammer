@@ -18,8 +18,6 @@ type NetconfResult struct {
 	SessionID int
 	Hostname  string
 	Operation string
-	Request   string
-	Response  string
 	When      float64
 	Err       string
 	Latency   float64
