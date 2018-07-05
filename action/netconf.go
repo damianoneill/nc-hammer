@@ -11,6 +11,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// Timeout is a global timeout for the NETCONF Session, defaults to 30 seconds, can be overrideen by the commandline
+var Timeout int
 var gSessions map[string]*netconf.Session
 
 func init() {
@@ -109,5 +111,5 @@ func createNewSession(hostname string, username string, password string) (*netco
 		Auth:            []ssh.AuthMethod{ssh.Password(password)},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
-	return netconf.DialSSHTimeout(hostname, sshConfig, 30*time.Second)
+	return netconf.DialSSHTimeout(hostname, sshConfig, time.Duration(Timeout)*time.Second)
 }
