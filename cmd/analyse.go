@@ -20,8 +20,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// analyseCmd represents the analyse command
-var analyseCmd = &cobra.Command{
+// AnalyseCmd represents the analyse command
+var AnalyseCmd = &cobra.Command{
 	Use:   "analyse <results file>",
 	Short: "Analyse the output of a Test Suite run",
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -34,12 +34,12 @@ var analyseCmd = &cobra.Command{
 		if results, ts, err := result.UnarchiveResults(args[0]); err != nil {
 			log.Fatalf("Problem with loading result information: %v ", err)
 		} else {
-			analyseResults(cmd, ts, results)
+			AnalyseResults(cmd, ts, results)
 		}
 	},
 }
 
-func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.NetconfResult) {
+func AnalyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.NetconfResult) {
 	log.Println("")
 	log.Printf("Testsuite executed at %v\n", strings.Split(ts.File, string(filepath.Separator))[1])
 	var hosts []string
@@ -49,7 +49,7 @@ func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 	log.Printf("Suite defined the following hosts: %v\n", hosts)
 
 	latencies := make(map[string]map[string][]float64)
-	errCount := orderAndExcludeErrValues(results, latencies)
+	errCount := OrderAndExcludeErrValues(results, latencies)
 
 	// get the largest when time from the results, this is the last action to run
 	var when float64
@@ -65,10 +65,14 @@ func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 
 	log.Println("")
 
-	// nolint
-	op, _ := cmd.Flags().GetString("operation")
-	// nolint
-	hostname, _ := cmd.Flags().GetString("hostname")
+	/*
+		//nolint
+		op, _ := cmd.Flags().GetString("operation")
+		//nolint
+		hostname, _ := cmd.Flags().GetString("hostname")
+	*/
+	op := ""
+	hostname := ""
 
 	data := [][]string{}
 	for host, operations := range latencies {
@@ -92,8 +96,8 @@ func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 	table.Render()
 }
 
-func orderAndExcludeErrValues(results []result.NetconfResult, latencies map[string]map[string][]float64) int {
-	sortResults(results)
+func OrderAndExcludeErrValues(results []result.NetconfResult, latencies map[string]map[string][]float64) int {
+	SortResults(results)
 
 	var errCount int
 	for _, result := range results {
@@ -110,7 +114,7 @@ func orderAndExcludeErrValues(results []result.NetconfResult, latencies map[stri
 	return errCount
 }
 
-func sortResults(results []result.NetconfResult) {
+func SortResults(results []result.NetconfResult) {
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Hostname != results[j].Hostname {
 			return results[i].Hostname < results[j].Hostname
@@ -132,7 +136,7 @@ func renderTable(table *tablewriter.Table, header []string, data *[][]string) {
 }
 
 func init() {
-	RootCmd.AddCommand(analyseCmd)
-	analyseCmd.Flags().StringP("operation", "o", "", "filter based on operation type; get, get-config or edit-config")
-	analyseCmd.Flags().StringP("hostname", "", "", "filter based on host name or ip")
+	RootCmd.AddCommand(AnalyseCmd)
+	AnalyseCmd.Flags().StringP("operation", "o", "", "filter based on operation type; get, get-config or edit-config")
+	AnalyseCmd.Flags().StringP("hostname", "", "", "filter based on host name or ip")
 }

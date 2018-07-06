@@ -1,23 +1,30 @@
-package cmd
+package cmd_test
 
 import (
 	"reflect"
 	"testing"
 
 	"github.com/damianoneill/nc-hammer/result"
+	. "github.com/damianoneill/nc-hammer/suite"
+	. "github.com/nc-hammer/cmd"
+	"github.com/spf13/cobra"
+	//. "github.com/nc-hammer/suite"
 )
 
-var ts1 = result.NetconfResult{0, 0, "10.0.0.1", "get", 0, "error", 0}
-var ts2 = result.NetconfResult{0, 0, "10.0.0.2", "get", 0, "", 0}
-var ts3 = result.NetconfResult{0, 0, "10.0.0.3 ", "get", 0, "", 0}
-var ts4 = result.NetconfResult{0, 0, "10.0.0.3 ", "edit-config", 0, "", 0}
+var (
+	ts1 = result.NetconfResult{5, 2318, "172.26.138.91", "edit-config", 55282, "", 288}
+	ts2 = result.NetconfResult{6, 859, "172.26.138.92", "get-config", 55943, "", 176}
+	ts3 = result.NetconfResult{4, 601, "172.26.138.93", "get", 59840, "", 3320}
+	ts4 = result.NetconfResult{4, 2322, "172.26.138.91", "get", 56967, "", 420}
+	ts5 = result.NetconfResult{4, 860, "172.26.138.92", "kill-session", 0, "kill-session is not a supported operation", 0}
+)
 
 func TestSortResults(t *testing.T) {
 
 	testSort := func(t *testing.T, testArray []result.NetconfResult, want []result.NetconfResult) {
 		t.Helper()
 
-		sortResults(testArray)
+		SortResults(testArray)
 		got := testArray
 
 		if !reflect.DeepEqual(got, want) {
@@ -33,26 +40,38 @@ func TestSortResults(t *testing.T) {
 	})
 
 	t.Run("sort by Operation", func(t *testing.T) {
-		testArray := []result.NetconfResult{ts3, ts4, ts2}
-		want := []result.NetconfResult{ts2, ts4, ts3}
+		testArray := []result.NetconfResult{ts3, ts4, ts2, ts5, ts1}
+		want := []result.NetconfResult{ts1, ts4, ts2, ts5, ts3}
 
 		testSort(t, testArray, want)
 	})
 
 }
 
-// Note*  How can I check if latencies has been populated? Unsure as
-// to whether the latencies map is being copied or referenced in func.
-// If it's not returned here, how can I check it's validity?
-
 func TestOrderAndExcludeErrValues(t *testing.T) {
-	testResults := []result.NetconfResult{ts1, ts2, ts3}
+	testResults := []result.NetconfResult{ts1, ts2, ts3, ts4, ts5}
 	testLatencies := make(map[string]map[string][]float64)
 
-	got := 1
-	want := orderAndExcludeErrValues(testResults, testLatencies)
+	got := OrderAndExcludeErrValues(testResults, testLatencies)
 
-	if got != want {
-		t.Errorf("got %v, want %v", got, want)
+	if got != 1 {
+		t.Errorf("got %v, want %v", 1, got)
 	}
+}
+
+func TestAnalyseResults(t *testing.T) {
+
+	//var mockBlock = []Block{Block{"test", []Action{}}}
+	//var mockConfig Configs
+	var mockCmd *cobra.Command
+
+	var testArray = []result.NetconfResult{ts1, ts2, ts3}
+
+	//var mockTest, _ = NewTestSuite("cmd/test.yml")
+	//var mockTest = TestSuite{"/suite/testdata", 10, 7, 2, mockConfig, mockBlock}
+
+	emptyTs := TestSuite{}
+	emptyTs.File = "testdata/emptytestsuite.yml"
+
+	AnalyseResults(mockCmd, &emptyTs, testArray)
 }
