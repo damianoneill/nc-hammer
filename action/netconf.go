@@ -2,6 +2,7 @@ package action
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -68,7 +69,7 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 
 	raw := netconf.RawMethod(xml)
 	start := time.Now()
-	_, err = session.Exec(raw)
+	rpcReply, err := session.Exec(raw)
 	if err != nil {
 		if err.Error() == "WaitForFunc failed" {
 			delete(gSessions, strconv.Itoa(cID)+config.Hostname+":"+strconv.Itoa(config.Port))
@@ -79,10 +80,24 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 		return
 	}
 	elapsed := time.Since(start)
-
 	result.When = float64(time.Since(tsStart).Nanoseconds() / int64(time.Millisecond))
 	result.Latency = float64(elapsed.Nanoseconds() / int64(time.Millisecond))
 
+	if action.Netconf.Expected != nil {
+		match, err := regexp.MatchString(*action.Netconf.Expected, rpcReply.Data)
+		if err != nil {
+			fmt.Printf("E")
+			result.Err = err.Error()
+			resultChannel <- result
+			return
+		}
+		if !match {
+			fmt.Printf("e")
+			result.Err = "expected response did not match, expected: " + *action.Netconf.Expected + " actual: " + rpcReply.Data
+			resultChannel <- result
+			return
+		}
+	}
 	resultChannel <- result
 }
 

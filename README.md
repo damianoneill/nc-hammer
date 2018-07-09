@@ -5,7 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/damianoneill/nc-hammer)](http://goreportcard.com/report/damianoneill/nc-hammer)
 [![license](https://img.shields.io/github/license/damianoneill/nc-hammer.svg)](https://github.com/damianoneill/nc-hammer/blob/master/LICENSE)
 
-If you don't have a Go evnironment setup, you can __dowload a binary__ from the [releases](https://github.com/damianoneill/nc-hammer/releases) page, I suggest you place this somewhere in an existing bin path.
+If you don't have a Go evnironment setup, you can __download a binary__ from the [releases](https://github.com/damianoneill/nc-hammer/releases) page, I suggest you place this somewhere in an existing bin path.
 
 The tool uses a YAML file to define the test suite.  A sample [Test Suite](./suite/testdata/testsuite.yml) is included in the repository.  Running a scenario generates a results directory containing a copy of the testsuite definition and its results encoded in CSV format.  The tool can then be used to generate reports against the contents within the results directory.
 
@@ -105,6 +105,20 @@ When running the testsuite the content in the XML file will be inlined as if it 
     config: <top xmlns="http://example.com/schema/1.2/config"><protocols><ospf><area><name>0.0.0.0</name><interfaces><interface
       xc:operation="delete"><name>192.0.2.4</name></interface></interfaces></area></ospf></protocols></top>
 ```
+
+A simple response validator is included with the netconf action definition.  This uses [Regex](https://en.wikipedia.org/wiki/Regular_expression) to pattern match on the response payload for a netconf rpc.  The YAML field itself is optional, if populated the regex pattern will be matched against the rpcReply and if unsuccessful will generate an error.  An example of a netconf action defined using the expected response follows:
+
+```yaml
+  - netconf:
+      hostname: 10.0.0.2
+      operation: get
+      filter:
+        type: subtree
+        select: <users/>
+      expected: "(<[^>]+>)"
+```
+
+For user unfamiliar with regex pattern matching, online tools such as [txt2re](https://txt2re.com) can really help.
 
 #### Init
 

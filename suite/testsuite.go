@@ -38,6 +38,7 @@ type Netconf struct {
 	Target    *string `json:",omitempty" yaml:",omitempty"`
 	Filter    *Filter `json:",omitempty" yaml:",omitempty"`
 	Config    *string `json:",omitempty" yaml:",omitempty"` // used in the edit-config, starts with the top element
+	Expected  *string `json:",omitempty" yaml:",omitempty"`
 }
 
 // Sleep is an action instructing the client to sleep for the period defined in duration

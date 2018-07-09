@@ -32,6 +32,7 @@ blocks:
       filter:
         type: subtree
         select: <users/>
+      expected: "(<[^>]+>)"
 - type: sequential        # sequential block type, individual actions are executed sequentially
   actions:
   - netconf:
