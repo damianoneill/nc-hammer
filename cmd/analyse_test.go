@@ -5,22 +5,14 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"os"
-	"path/filepath"
 	"reflect"
-	"regexp"
-	"strconv"
-	"strings"
 	"testing"
-	"time"
 
 	"github.com/damianoneill/nc-hammer/result"
 	. "github.com/damianoneill/nc-hammer/suite"
 	. "github.com/nc-hammer/cmd"
 	"github.com/spf13/cobra"
-	"github.com/stretchr/testify/assert"
-	"gonum.org/v1/gonum/stat"
 )
 
 var (
@@ -83,107 +75,32 @@ func TestAnalyseResults(t *testing.T) {
 	mockTs := TestSuite{}
 	mockTs.File = "testdata/emptytestsuite.yml"
 
-	// capture console printout
 	old := os.Stdout // keep backup of the real stdout
-	r, w, err := os.Pipe()
-	if err != nil {
-		log.Fatal(err)
-	}
+	r, w, _ := os.Pipe()
 	os.Stdout = w
-	outC := make(chan string)
-
-	go func() { // copy the output in a separate goroutine so printing can't block indefinitely
-		var buf bytes.Buffer
-		io.Copy(&buf, r)
-		outC <- buf.String()
-	}()
 
 	AnalyseResults(mockCmd, &mockTs, testArray)
 
+	outC := make(chan string)
+	// copy the output in a separate goroutine so printing can't block indefinitely
+	go func() {
+		var buf bytes.Buffer
+		io.Copy(&buf, r)
+		outC <- buf.String()
+		buf.Reset()
+	}()
+
 	// back to normal state
 	w.Close()
-	os.Stdout = old
-	consoleOutput := <-outC
+	os.Stdout = old // restoring the real stdout
+	out := <-outC
 
-	// fmt.Println("\nLOG\n-------------")
-	// fmt.Print(logOutput)
-	// fmt.Println("\nCONSOLE\n-------------")
-	// fmt.Println(consoleOutput)
-	//
-	//
+	// reading our temp stdout
+	fmt.Println("previous output:")
+	fmt.Print(out)
 
-	// Create log test string
-	var testLogOutput bytes.Buffer
-
-	testLogOutput.WriteString("\nTestsuite executed at ")
-	filePath := mockTs.File
-	filePath = strings.Split(filePath, string(filepath.Separator))[1]
-	testLogOutput.WriteString(filePath + "\n")
-
-	var hosts bytes.Buffer
-	hosts.WriteString("[")
-	for _, config := range mockTs.Configs {
-		hosts.WriteString(config.Hostname + " ")
-	}
-	hosts.WriteString("]")
-	testLogOutput.WriteString("Suite defined the following hosts: ")
-	testLogOutput.WriteString(hosts.String() + "\n")
-
-	latencies := make(map[string]map[string][]float64)
-	errCount := OrderAndExcludeErrValues(testArray, latencies)
-
-	var when float64
-	for _, result := range testArray {
-		if result.When > when {
-			when = result.When
-		}
-	}
-	executionTime := time.Duration(when) * time.Millisecond
-
-	testLogOutput.WriteString(strconv.Itoa(mockTs.Clients) + " client(s) started, " + strconv.Itoa(mockTs.Iterations) +
-		" iterations per client, " + strconv.Itoa(mockTs.Rampup) + " seconds wait between starting each client\n")
-	testLogOutput.WriteString("\nTotal execution time: " + (executionTime).String() + ", Suite execution contained " +
-		strconv.Itoa(errCount) + " errors\n\n")
-
-	//fmt.Println("\nTEST\n-------------")
-	//fmt.Print(testLogOutput.String())
-
-	assert.Equal(t, testLogOutput.String(), logOutput.String(), "LOG: the two outputs do not match")
-
-	//
-	//
-
-	// Create console test string
-	op, hostname := "", ""
-
-	data := [][]string{}
-	for host, operations := range latencies {
-		for operation, latencies := range operations {
-			if op != "" && op != operation {
-				continue
-			}
-			if hostname != "" && hostname != host {
-				continue
-			}
-			mean := stat.Mean(latencies, nil)
-			tps := 1000 / mean
-			variance := stat.Variance(latencies, nil)
-			stddev := math.Sqrt(variance)
-			data = append(data, []string{host, operation, strconv.FormatBool(mockTs.Configs.IsReuseConnection(host)), strconv.Itoa(len(latencies)), fmt.Sprintf("%.2f", tps), fmt.Sprintf("%.2f", mean), fmt.Sprintf("%.2f", variance), fmt.Sprintf("%.2f", stddev)})
-		}
-	}
-
-	// remove formatting from table in console output
-	re := regexp.MustCompile(`\s+`)
-	consoleOutput = re.ReplaceAllString(consoleOutput, " ")
-
-	var testConsoleOutput = bytes.Buffer{}
-	testConsoleOutput.WriteString(" HOST OPERATION REUSE CONNECTION REQUESTS TPS MEAN VARIANCE STD DEVIATION ")
-	for i, row := range data {
-		for j, _ := range row {
-			testConsoleOutput.WriteString(data[i][j] + " ")
-		}
-	}
-	assert.Equal(t, testConsoleOutput.String(), consoleOutput, "CONSOLE: the two outputs do not match")
-
+	//fmt.Println("\nLOG\n-------------")
+	//fmt.Print(logOutput)
+	//fmt.Println("\nCONSOLE\n-------------")
+	//fmt.Println(b)
 }
