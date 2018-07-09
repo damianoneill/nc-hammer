@@ -18,7 +18,6 @@ import (
 	"github.com/damianoneill/nc-hammer/result"
 	. "github.com/damianoneill/nc-hammer/suite"
 	. "github.com/nc-hammer/cmd"
-	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"gonum.org/v1/gonum/stat"
@@ -187,16 +186,4 @@ func TestAnalyseResults(t *testing.T) {
 	}
 	assert.Equal(t, testConsoleOutput.String(), consoleOutput, "CONSOLE: the two outputs do not match")
 
-}
-
-func renderTable(table *tablewriter.Table, header []string, data *[][]string) {
-	table.SetHeader(header)
-	table.SetRowLine(true)
-
-	table.SetCenterSeparator("")
-	table.SetColumnSeparator("")
-	table.SetRowSeparator("")
-	table.SetHeaderAlignment(tablewriter.ALIGN_LEFT)
-
-	table.AppendBulk(*data)
 }
