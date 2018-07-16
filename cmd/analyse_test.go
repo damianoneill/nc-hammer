@@ -98,7 +98,7 @@ func TestAnalyseResults(t *testing.T) {
 	// Capture StdErr
 	var lOut = new(bytes.Buffer)
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime)) // remove timestamps
-	log.SetOutput(lOut)
+	log.SetOutput(lOut)                                  // log output
 
 	// Capture StdOut
 	old := os.Stdout
@@ -119,7 +119,7 @@ func TestAnalyseResults(t *testing.T) {
 
 	w.Close()
 	os.Stdout = old
-	cOut := <-out
+	cOut := <-out // console output
 
 	// Build log test string
 
@@ -128,7 +128,6 @@ func TestAnalyseResults(t *testing.T) {
 	logBuffer.WriteString("Testsuite executed at " + strings.Split(mockTs.File, string(filepath.Separator))[1] + " Suite defined the following hosts: ")
 	logBuffer.WriteString("[")
 	for _, config := range mockTs.Configs {
-
 		logBuffer.WriteString(config.Hostname + " ")
 	}
 	logBuffer.WriteString("] ")
@@ -176,13 +175,13 @@ func TestAnalyseResults(t *testing.T) {
 			consoleBuffer.WriteString(host + " " + operation + " " + strconv.FormatBool(mockTs.Configs.IsReuseConnection(host)) + " " + strconv.Itoa(len(latencies)) + " " + fmt.Sprintf("%.2f", tps) + " " + fmt.Sprintf("%.2f", mean) + " " + fmt.Sprintf("%.2f", variance) + " " + fmt.Sprintf("%.2f", stddev) + " ")
 		}
 	}
-	removewhtsp := regexp.MustCompile(`^[\s\p{Zs}]+|[\s\p{Zs}]+$`)
-	want := removewhtsp.ReplaceAllString(cOut, "")
-	removewhtsp = regexp.MustCompile(`[\s\p{Zs}]{2,}`)
-	want = removewhtsp.ReplaceAllString(want, " ")
+	removeWhtsp := regexp.MustCompile(`^[\s\p{Zs}]+|[\s\p{Zs}]+$`)
+	want := removeWhtsp.ReplaceAllString(cOut, "")
+	removeWhtsp = regexp.MustCompile(`[\s\p{Zs}]{2,}`)
+	want = removeWhtsp.ReplaceAllString(want, " ")
 
 	got = strings.Trim(consoleBuffer.String(), " ")
-	assert.Equal(t, want, got)
+	assert.Equal(t, want, got) //test
 }
 
 func TestAnalyseArgs(t *testing.T) {
@@ -194,11 +193,10 @@ func TestAnalyseArgs(t *testing.T) {
 		t.Helper()
 
 		want := testCmd.Args(cmd, args) // args = 1 or != 1
-
 		assert.Equal(t, got, want)
 	}
 
-	t.Run("args = 1", func(t *testing.T) {
+	t.Run("args == 1", func(t *testing.T) {
 		var a = []string{"a"}
 
 		testStruct(t, a, nil)

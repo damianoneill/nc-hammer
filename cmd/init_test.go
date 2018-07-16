@@ -8,7 +8,7 @@ import (
 )
 
 /*
-	NOTE: UNFINISHED
+	NOTE: UNFINISHED -- checking for correct initialisation of Testsuite struct
 */
 func TestBuildTestSuite(t *testing.T) {
 
