@@ -20,7 +20,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NOTE: Changed the scope of this function in order to test it
 // AnalyseCmd represents the analyse command
 var AnalyseCmd = &cobra.Command{
 	Use:   "analyse <results file>",
@@ -40,13 +39,7 @@ var AnalyseCmd = &cobra.Command{
 	},
 }
 
-/*
-	NOTE: Changed the scope of this function in order to test it
-
-	Also, I commented out the variables op and hostname where initialised in order
-	to test the func. I didn't know how to set the appropriate flags at the time
-	of writing the tests.
-*/
+// AnalyseResults Analyse the output of a Test Suite run
 func AnalyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.NetconfResult) {
 
 	log.Println("")
@@ -104,9 +97,8 @@ func AnalyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 	table.Render()
 }
 
-// NOTE: Changed the scope of this function in order to test it
+// OrderAndExcludeErrValues Orders the results and removes errors from output. Returns number of errors found.
 func OrderAndExcludeErrValues(results []result.NetconfResult, latencies map[string]map[string][]float64) int {
-	SortResults(results)
 
 	var errCount int
 	for _, result := range results {
@@ -120,10 +112,11 @@ func OrderAndExcludeErrValues(results []result.NetconfResult, latencies map[stri
 			latencies[result.Hostname][result.Operation] = append(latencies[result.Hostname][result.Operation], result.Latency)
 		}
 	}
+	SortResults(results)
 	return errCount
 }
 
-// NOTE: Changed the scope of this function in order to test it
+// SortResults Sorts its contents by hostname or operation if duplicate hostnames exist
 func SortResults(results []result.NetconfResult) {
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Hostname != results[j].Hostname {

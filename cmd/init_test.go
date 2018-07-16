@@ -1,6 +1,7 @@
 package cmd_test
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -29,6 +30,7 @@ func TestBuildTestSuite(t *testing.T) {
 	for i := 0; i < got.NumField(); i++ {
 		values[i] = got.Field(i).Interface()
 	}
-	//fmt.Println(values) // printing out fields in struct to test later
+
+	fmt.Println(values) // printing out fields in struct to test later
 
 }
