@@ -8,9 +8,6 @@ import (
 	. "github.com/nc-hammer/cmd"
 )
 
-/*
-	NOTE: UNFINISHED -- checking for correct initialisation of Testsuite struct
-*/
 func TestBuildTestSuite(t *testing.T) {
 
 	mockPath := ""

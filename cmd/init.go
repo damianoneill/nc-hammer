@@ -55,7 +55,7 @@ var initCmd = &cobra.Command{
 	},
 }
 
-// NOTE: Changed the scope of this function in order to test it
+// BuildTestSuite Initialises a TestSuite struct with default values and returns a pointer to it.
 func BuildTestSuite(path string) *suite.TestSuite {
 	var ts suite.TestSuite
 	ts.Iterations = 5
