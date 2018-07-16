@@ -20,6 +20,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NOTE: Changed the scope of this function in order to test it
 // AnalyseCmd represents the analyse command
 var AnalyseCmd = &cobra.Command{
 	Use:   "analyse <results file>",
@@ -39,7 +40,15 @@ var AnalyseCmd = &cobra.Command{
 	},
 }
 
+/*
+	NOTE: Changed the scope of this function in order to test it
+
+	Also, I commented out the variables op and hostname where initialised in order
+	to test the func. I didn't know how to set the appropriate flags at the time
+	of writing the tests.
+*/
 func AnalyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.NetconfResult) {
+
 	log.Println("")
 	log.Printf("Testsuite executed at %v\n", strings.Split(ts.File, string(filepath.Separator))[1])
 	var hosts []string
@@ -90,12 +99,12 @@ func AnalyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 			data = append(data, []string{host, operation, strconv.FormatBool(ts.Configs.IsReuseConnection(host)), strconv.Itoa(len(latencies)), fmt.Sprintf("%.2f", tps), fmt.Sprintf("%.2f", mean), fmt.Sprintf("%.2f", variance), fmt.Sprintf("%.2f", stddev)})
 		}
 	}
-
 	var table = tablewriter.NewWriter(os.Stdout)
 	renderTable(table, []string{"Host", "Operation", "Reuse Connection", "Requests", "TPS", "Mean", "Variance", "Std Deviation"}, &data)
 	table.Render()
 }
 
+// NOTE: Changed the scope of this function in order to test it
 func OrderAndExcludeErrValues(results []result.NetconfResult, latencies map[string]map[string][]float64) int {
 	SortResults(results)
 
@@ -114,6 +123,7 @@ func OrderAndExcludeErrValues(results []result.NetconfResult, latencies map[stri
 	return errCount
 }
 
+// NOTE: Changed the scope of this function in order to test it
 func SortResults(results []result.NetconfResult) {
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Hostname != results[j].Hostname {
