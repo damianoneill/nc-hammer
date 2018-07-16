@@ -60,7 +60,6 @@ func TestSortResults(t *testing.T) {
 
 		testSort(t, unsortedSlice, want)
 	})
-
 }
 
 func TestOrderAndExcludeErrValues(t *testing.T) {
@@ -76,7 +75,7 @@ func TestOrderAndExcludeErrValues(t *testing.T) {
 
 /*
 	NOTE: In the test function below I am only testing one NetconfResult struct this is due to the problem
-	I mentioned I had in the meeting earlier on today regarding the latencies hashmap. I will try using the
+	I mentioned I had in the meeting earlier on today regarding the latencies hashMap. I will try using the
 	SortResults func after this commit to correct the problem.
 
 	TODO:
