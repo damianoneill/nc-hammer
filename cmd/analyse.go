@@ -20,8 +20,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// AnalyseCmd represents the analyse command
-var AnalyseCmd = &cobra.Command{
+// analyseCmd represents the analyse command
+var analyseCmd = &cobra.Command{
 	Use:   "analyse <results file>",
 	Short: "Analyse the output of a Test Suite run",
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -34,14 +34,12 @@ var AnalyseCmd = &cobra.Command{
 		if results, ts, err := result.UnarchiveResults(args[0]); err != nil {
 			log.Fatalf("Problem with loading result information: %v ", err)
 		} else {
-			AnalyseResults(cmd, ts, results)
+			analyseResults(cmd, ts, results)
 		}
 	},
 }
 
-// AnalyseResults Analyse the output of a Test Suite run
-func AnalyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.NetconfResult) {
-
+func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.NetconfResult) {
 	log.Println("")
 	log.Printf("Testsuite executed at %v\n", strings.Split(ts.File, string(filepath.Separator))[1])
 	var hosts []string
@@ -51,7 +49,7 @@ func AnalyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 	log.Printf("Suite defined the following hosts: %v\n", hosts)
 
 	latencies := make(map[string]map[string][]float64)
-	errCount := OrderAndExcludeErrValues(results, latencies)
+	errCount := orderAndExcludeErrValues(results, latencies)
 
 	// get the largest when time from the results, this is the last action to run
 	var when float64
@@ -67,14 +65,10 @@ func AnalyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 
 	log.Println("")
 
-	/*
-		//nolint
-		op, _ := cmd.Flags().GetString("operation")
-		//nolint
-		hostname, _ := cmd.Flags().GetString("hostname")
-	*/
-	op := ""
-	hostname := ""
+	// nolint
+	op, _ := cmd.Flags().GetString("operation")
+	// nolint
+	hostname, _ := cmd.Flags().GetString("hostname")
 
 	data := [][]string{}
 	for host, operations := range latencies {
@@ -92,13 +86,14 @@ func AnalyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 			data = append(data, []string{host, operation, strconv.FormatBool(ts.Configs.IsReuseConnection(host)), strconv.Itoa(len(latencies)), fmt.Sprintf("%.2f", tps), fmt.Sprintf("%.2f", mean), fmt.Sprintf("%.2f", variance), fmt.Sprintf("%.2f", stddev)})
 		}
 	}
+
 	var table = tablewriter.NewWriter(os.Stdout)
 	renderTable(table, []string{"Host", "Operation", "Reuse Connection", "Requests", "TPS", "Mean", "Variance", "Std Deviation"}, &data)
 	table.Render()
 }
 
-// OrderAndExcludeErrValues Orders the results and removes errors from output. Returns number of errors found.
-func OrderAndExcludeErrValues(results []result.NetconfResult, latencies map[string]map[string][]float64) int {
+func orderAndExcludeErrValues(results []result.NetconfResult, latencies map[string]map[string][]float64) int {
+	sortResults(results)
 
 	var errCount int
 	for _, result := range results {
@@ -112,12 +107,10 @@ func OrderAndExcludeErrValues(results []result.NetconfResult, latencies map[stri
 			latencies[result.Hostname][result.Operation] = append(latencies[result.Hostname][result.Operation], result.Latency)
 		}
 	}
-	SortResults(results)
 	return errCount
 }
 
-// SortResults Sorts its contents by hostname or operation if duplicate hostnames exist
-func SortResults(results []result.NetconfResult) {
+func sortResults(results []result.NetconfResult) {
 	sort.Slice(results, func(i, j int) bool {
 		if results[i].Hostname != results[j].Hostname {
 			return results[i].Hostname < results[j].Hostname
@@ -139,7 +132,7 @@ func renderTable(table *tablewriter.Table, header []string, data *[][]string) {
 }
 
 func init() {
-	RootCmd.AddCommand(AnalyseCmd)
-	AnalyseCmd.Flags().StringP("operation", "o", "", "filter based on operation type; get, get-config or edit-config")
-	AnalyseCmd.Flags().StringP("hostname", "", "", "filter based on host name or ip")
+	RootCmd.AddCommand(analyseCmd)
+	analyseCmd.Flags().StringP("operation", "o", "", "filter based on operation type; get, get-config or edit-config")
+	analyseCmd.Flags().StringP("hostname", "", "", "filter based on host name or ip")
 }
