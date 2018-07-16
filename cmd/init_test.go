@@ -28,6 +28,6 @@ func TestBuildTestSuite(t *testing.T) {
 		values[i] = got.Field(i).Interface()
 	}
 
-	fmt.Println(values) // printing out fields in struct to test later
+	fmt.Println(values)
 
 }
