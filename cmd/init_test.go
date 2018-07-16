@@ -1,15 +1,13 @@
 package cmd_test
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
 	. "github.com/nc-hammer/cmd"
 )
 
-/*
-	NOTE: UNFINISHED -- checking for correct initialisation of Testsuite struct
-*/
 func TestBuildTestSuite(t *testing.T) {
 
 	mockPath := ""
@@ -29,6 +27,7 @@ func TestBuildTestSuite(t *testing.T) {
 	for i := 0; i < got.NumField(); i++ {
 		values[i] = got.Field(i).Interface()
 	}
-	//fmt.Println(values) // printing out fields in struct to test later
+
+	fmt.Println(values)
 
 }

@@ -27,11 +27,11 @@ import (
 
 // Test variables used to populate []result.NetconfResult used throughout
 var (
-	ts1 = result.NetconfResult{5, 2318, "172.26.138.91", "edit-config", 55282, "", 288}
-	ts2 = result.NetconfResult{6, 859, "172.26.138.92", "get-config", 55943, "", 176}
-	ts3 = result.NetconfResult{4, 601, "172.26.138.93", "get", 59840, "", 3320}
-	ts4 = result.NetconfResult{4, 2322, "172.26.138.91", "get", 56967, "", 420}
-	ts5 = result.NetconfResult{4, 860, "172.26.138.92", "kill-session", 0, "kill-session is not a supported operation", 0}
+	ts1 = result.NetconfResult{Client: 5, SessionID: 2318, Hostname: "172.26.138.91", Operation: "edit-config", When: 55282, Err: "", Latency: 288}
+	ts2 = result.NetconfResult{Client: 6, SessionID: 859, Hostname: "172.26.138.92", Operation: "get-config", When: 55943, Err: "", Latency: 176}
+	ts3 = result.NetconfResult{Client: 4, SessionID: 601, Hostname: "172.26.138.93", Operation: "get", When: 9840, Err: "", Latency: 3320}
+	ts4 = result.NetconfResult{Client: 4, SessionID: 2322, Hostname: "172.26.138.91", Operation: "get", When: 56967, Err: "", Latency: 420}
+	ts5 = result.NetconfResult{Client: 4, SessionID: 860, Hostname: "172.26.138.92", Operation: "kill-session", When: 0, Err: "kill-session is not a supported operation", Latency: 0}
 )
 
 func TestSortResults(t *testing.T) {
@@ -60,7 +60,6 @@ func TestSortResults(t *testing.T) {
 
 		testSort(t, unsortedSlice, want)
 	})
-
 }
 
 func TestOrderAndExcludeErrValues(t *testing.T) {
@@ -74,24 +73,10 @@ func TestOrderAndExcludeErrValues(t *testing.T) {
 	}
 }
 
-/*
-	NOTE: In the test function below I am only testing one NetconfResult struct this is due to the problem
-	I mentioned I had in the meeting earlier on today regarding the latencies hashmap. I will try using the
-	SortResults func after this commit to correct the problem.
-
-	TODO:
-	Add test cases to capture op and hostname test cases
-		if op != "" && op != operation {
-			continue
-		}
-		if hostname != "" && hostname != host {
-			continue
-		}
-*/
 func TestAnalyseResults(t *testing.T) {
 
 	var mockCmd *cobra.Command
-	var mockResults = []result.NetconfResult{ts1}
+	var mockResults = []result.NetconfResult{ts1, ts2, ts3}
 	var mockTs = TestSuite{}
 	mockTs.File = "testdata/emptytestsuite.yml"
 
@@ -153,8 +138,9 @@ func TestAnalyseResults(t *testing.T) {
 
 	assert.Equal(t, got, logBuffer.String()) // test
 
-	op := ""
-	hostname := ""
+	// TODO: Add test cases to capture op and hostname test cases --
+	op := ""       // AnalyseCmd.Flags().StringP("operation", "o", "", "filter based on operation type; get, get-config or edit-config")
+	hostname := "" // AnalyseCmd.Flags().StringP("hostname", "", "", "filter based on host name or ip")
 
 	// Build console test string
 
@@ -209,21 +195,6 @@ func TestAnalyseArgs(t *testing.T) {
 		testStruct(t, b, rstr)
 	})
 }
-
-/*
-NOTE:
-Below is the test func which I discussed in the meeting earlier today.
-To test the func I decided I would base my test around which exit status was returned: 0 for success;
-non-0 for failure. Golang doesn’t provide a straightforward way of capturing this, so I had to look online for a solution.
-
-Andrew Gerrand provides a solution to this problem here https://talks.golang.org/2014/testing.slide#23 ,
-and discusses its implementation here https://www.youtube.com/watch?v=ndmB0bj7eyw&feature=youtu.be&t=47m09s
-
-This solution uses a sub-process to examine how the program exits, and then allows you to look at it’s exit status.
-The only downside to this is that as it uses a sub-process to examine how the main test function exits, Go
-doesn’t recognise this subprocess and hence doesn’t count it when checking code coverage. This post explains
-it further: https://stackoverflow.com/questions/40615641/testing-os-exit-scenarios-in-go-with-coverage-information-coveralls-io-goverall
-*/
 
 // TODO: Add further test cases
 func TestAnalyseRun(t *testing.T) {
