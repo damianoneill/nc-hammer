@@ -36,7 +36,7 @@ func analyseErrors(cmd *cobra.Command, ts *suite.TestSuite, results []result.Net
 	log.Println("")
 	log.Printf("Testsuite executed at %v\n", strings.Split(ts.File, string(filepath.Separator))[1])
 
-	sortResults(results)
+	SortResults(results)
 
 	var errors [][]string
 	for _, result := range results {
@@ -56,5 +56,5 @@ func analyseErrors(cmd *cobra.Command, ts *suite.TestSuite, results []result.Net
 }
 
 func init() {
-	analyseCmd.AddCommand(analyseErrorCmd)
+	AnalyseCmd.AddCommand(analyseErrorCmd)
 }

@@ -37,7 +37,7 @@ var initCmd = &cobra.Command{
 		}
 
 		// write out TestSuite Scaffold
-		bytes, err := yaml.Marshal(buildTestSuite(path))
+		bytes, err := yaml.Marshal(BuildTestSuite(path))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -55,7 +55,8 @@ var initCmd = &cobra.Command{
 	},
 }
 
-func buildTestSuite(path string) *suite.TestSuite {
+// BuildTestSuite Initialises a TestSuite struct with default values and returns a pointer to it.
+func BuildTestSuite(path string) *suite.TestSuite {
 	var ts suite.TestSuite
 	ts.Iterations = 5
 	ts.Clients = 2
