@@ -257,12 +257,45 @@ You should have a working go environment, packages are managed by [vgo](https://
 go get -u golang.org/x/vgo
 ```
 
+Now get the code
+
+```sh
+go get -u github.com/damianoneill/nc-hammer
+```
+
+This will place the code in your GOPATH at
+
+```sh
+$ ls $GOPATH/src/github.com/damianoneill/nc-hammer
+LICENSE   README.md action    cmd       go.mod    img       main.go   result    suite
+```
+
 There is an issue at the moment with vgo, regarding one of the sub projects version, so for the meantime we use the packages defined in go.mod definition to install the latest into GOPATH for building.
 
 ```sh
+$ cd $GOPATH/src/github.com/damianoneill/nc-hammer
 $ vgo list -m | awk '{ print $1 }' | grep -v MODULE | xargs go get -u
 $ go build
 ```
+
+## Contributing
+
+To contribute ensure you have [gometalinter](https://github.com/alecthomas/gometalinter) installed in your environment and that it passes for the build before generating a Pull Request.
+
+Ensure that any new code has unit test coverage.
+
+Fork the repository and setup a remote to your fork.
+
+```sh
+git remote add <yourid> git@github.com:<yourid>/nc-hammer.git
+```
+Create a branch, make your changes and push your branch to your fork.
+
+```sh
+git push <yourid> feature/helloworld
+```
+
+Generate a PR from your fork to the damianoneill:origin/master
 
 ## Credits
 
