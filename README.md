@@ -284,6 +284,8 @@ To contribute ensure you have [gometalinter](https://github.com/alecthomas/gomet
 
 Ensure that any new code has unit test coverage.
 
+To simplify working with Github, [configure Github with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/).
+
 Fork the repository and setup a remote to your fork.
 
 ```sh
