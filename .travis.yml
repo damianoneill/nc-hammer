@@ -16,7 +16,7 @@ before_script:
   - vgo list -m | awk '{ print $1 }' | grep -v MODULE | xargs go get -u
   - go get -u github.com/alecthomas/gometalinter
   - gometalinter --install
-  - go get -u code.google.com/p/go.tools/cmd/cover github.com/mattn/goveralls github.com/modocache/gover
+  - go get code.google.com/p/go.tools/cmd/cover github.com/mattn/goveralls github.com/modocache/gover
 
 script:
   - gometalinter --deadline=60s ./...
