@@ -1,0 +1,51 @@
+iterations: 10
+clients: 7
+rampup: 2
+configs:
+- hostname: 172.26.138.91
+  port: 830
+  username: netconf
+  password: netconf
+  reuseconnection: false
+- hostname: 172.26.138.92
+  port: 830
+  username: netconf
+  password: netconf
+  reuseconnection: false
+- hostname: 172.26.138.93
+  port: 830
+  username: netconf
+  password: netconf
+  reuseconnection: false
+blocks:
+- type: init
+  actions:
+  - netconf:
+      hostname: 172.26.138.91
+      operation: get
+      target: running
+- type: concurrent
+  actions:
+  - netconf:
+      hostname: 172.26.138.91
+      operation: edit-config
+      target: running
+      config: <edfas xmlns="http://www.lumentum.com/lumentum-ote-edfa" xmlns:lotee="http://www.lumentum.com/lumentum-ote-edfa"><edfa><dn>ne=1;chassis=1;card=1;edfa=2</dn><config><optical-loo-threshold>-6.40</optical-loo-threshold><optical-loo-hysteresis>1.00</optical-loo-hysteresis><input-overload-threshold>13.10</input-overload-threshold><input-overload-hysteresis>1.00</input-overload-hysteresis></config></edfa></edfas>
+  - netconf:
+      hostname: 172.26.138.93
+      operation: get
+      target: running
+  - netconf:
+      hostname: 172.26.138.92
+      operation: get-config
+      target: running
+  - netconf:
+      hostname: 172.26.138.91
+      operation: get
+      target: running
+  - netconf:
+      hostname: 172.26.138.92
+      operation: kill-session
+      target: running
+- type: ""
+  actions: []

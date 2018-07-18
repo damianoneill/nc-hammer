@@ -57,7 +57,7 @@ func Test_Run(t *testing.T) {
 	})
 	t.Run("err is nil", func(t *testing.T) {
 
-		args := []string{"../results/2018-07-04-11-05-18/"}
+		args := []string{"../suite/testdata/"}
 		analyseErrorCmd.Run(myCmd, args)
 
 	})
@@ -66,15 +66,13 @@ func Test_Run(t *testing.T) {
 
 func Test_anlyseErrors(t *testing.T) {
 
-	var (
-		ts1 = result.NetconfResult{5, 2318, "172.26.138.91", "edit-config", 55282, "", 288}
-		ts2 = result.NetconfResult{6, 859, "172.26.138.92", "get-config", 55943, "kill-session is not a supported operation", 176}
-		ts3 = result.NetconfResult{4, 601, "172.26.138.93", "get", 59840, "session closed by remote side", 3320}
-		ts4 = result.NetconfResult{4, 2322, "172.26.138.91", "get", 56967, "kill-session is not a supported operation", 420}
-		ts5 = result.NetconfResult{4, 860, "172.26.138.92", "kill-session", 0, "session closed by remote side", 0}
-	)
-
-	var testArray = []result.NetconfResult{ts3, ts1, ts2, ts4, ts5}
+	var testArray = []result.NetconfResult{
+		{5, 4, "172.26.138.91", "edit-config", 55282, "", 288},
+		{6, 859, "172.26.138.92", "get-config", 55943, "kill-session is not a supported operation", 176},
+		{4, 2322, "172.26.138.91", "get", 56967, "kill-session is not a supported operation", 420},
+		{4, 601, "172.26.138.93", "get", 59840, "session closed by remote side", 3320},
+		{4, 2322, "172.26.138.91", "get", 56967, "kill-session is not a supported operation", 420},
+	}
 
 	err := [][]string{
 		{"172.26.138.92", "get-config", "kill-session is not a supported operation"},
@@ -95,6 +93,8 @@ func Test_anlyseErrors(t *testing.T) {
 
 	got := strings.TrimSpace(buff.String())
 	errLen := strconv.Itoa(len(err))
-	want := strings.TrimSpace("Testsuite executed at " + strings.Split(myTs.File, string(filepath.Separator))[1] + "\n" + "Total Number of Errors for suite: " + errLen)
+	want := strings.TrimSpace("Testsuite executed at " + strings.Split(myTs.File, string(filepath.Separator))[1] +
+		"\n" + "Total Number of Errors for suite: " + errLen)
 	assert.Equal(t, got, want, "failed not equal")
+
 }

@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"bytes"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -44,17 +43,17 @@ var completionCmd = &cobra.Command{
 // Completion is a helper function to allow passing arguments to
 // other functions (so that they can be unit tested)
 func Completion(cmd *cobra.Command, args []string) {
-	buffer := bytes.Buffer{}
+
 	err := cmd.Root().GenBashCompletionFile(completionTarget)
-	completion(&buffer, err, args...)
+	completion(err, args...)
 }
 
-func completion(writer *bytes.Buffer, err error, args ...string) {
+func completion(err error, args ...string) {
 	if err != nil {
-		fmt.Fprintf(writer, err.Error())
+		fmt.Println(err)
 		return
 	}
-	fmt.Fprintf(writer, "Bash completion file for "+RootCmd.Use+" saved to "+completionTarget)
+	fmt.Println("Bash completion file for " + RootCmd.Use + " saved to " + completionTarget)
 }
 
 func init() {

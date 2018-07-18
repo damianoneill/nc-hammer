@@ -1,6 +1,13 @@
 package cmd
 
-import "testing"
+import (
+	"io/ioutil"
+	"os"
+	"strings"
+	"testing"
+
+	"github.com/spf13/cobra"
+)
 
 func Test_version(t *testing.T) {
 	type args struct {
@@ -21,4 +28,23 @@ func Test_version(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_Version(t *testing.T) {
+	myCmd := &cobra.Command{}
+	args := []string{"arg1", "arg2"}
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	Version(myCmd, args)
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+	got := strings.TrimSpace(string(out[:]))
+	want := RootCmd.Use + " version"
+	if want != got {
+		t.Errorf("wanted '%s', but got '%s'", want, got)
+	}
+
 }
