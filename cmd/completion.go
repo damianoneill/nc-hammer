@@ -43,7 +43,6 @@ var completionCmd = &cobra.Command{
 // Completion is a helper function to allow passing arguments to
 // other functions (so that they can be unit tested)
 func Completion(cmd *cobra.Command, args []string) {
-
 	err := cmd.Root().GenBashCompletionFile(completionTarget)
 	completion(err, args...)
 }
@@ -53,7 +52,7 @@ func completion(err error, args ...string) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("Bash completion file for " + RootCmd.Use + " saved to " + completionTarget)
+	fmt.Println("Bash completion file for "+RootCmd.Use+" saved to", completionTarget)
 }
 
 func init() {
