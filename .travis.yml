@@ -14,12 +14,10 @@ git:
 before_script:
   - go get -u golang.org/x/vgo
   - vgo list -m | awk '{ print $1 }' | grep -v MODULE | xargs go get -u
-  - go get -u github.com/alecthomas/gometalinter
-  - gometalinter --install
-  - go get code.google.com/p/go.tools/cmd/cover github.com/mattn/goveralls github.com/modocache/gover
+  - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
+  - go get -u github.com/mattn/goveralls
 
 script:
-  - gometalinter --deadline=60s ./...
-  - go list -f '{{if len .TestGoFiles}}"go test -coverprofile={{.Dir}}/.coverprofile {{.ImportPath}}"{{end}}' ./... | xargs sh -c
-  - gover
-  - goveralls -coverprofile=gover.coverprofile -service=travis-ci
+  - golangci-lint run ./...
+  - go test -v -race ./... -coverprofile=coverage.out # Run all the tests with the race detector enabled
+  - goveralls -coverprofile=coverage.out -service travis-ci
