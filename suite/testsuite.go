@@ -63,9 +63,9 @@ type Configs []Sshconfig
 
 // IsReuseConnection iterates through the Config slice and matches on host returning whether the connection should be reused or not
 func (c Configs) IsReuseConnection(hostname string) bool {
-	for _, config := range c {
-		if config.Hostname == hostname {
-			return config.Reuseconnection
+	for idx := range c {
+		if c[idx].Hostname == hostname {
+			return c[idx].Reuseconnection
 		}
 	}
 	return false
@@ -214,9 +214,9 @@ func addFilterIfPresent(n *Netconf, operation *etree.Element) {
 
 // GetConfig returns the connection information for a specific host
 func (ts *TestSuite) GetConfig(hostname string) *Sshconfig {
-	for _, config := range ts.Configs {
-		if config.Hostname == hostname {
-			return &config
+	for idx := range ts.Configs {
+		if ts.Configs[idx].Hostname == hostname {
+			return &ts.Configs[idx]
 		}
 	}
 	return nil
@@ -260,17 +260,17 @@ func validateTestSuite(ts *TestSuite) error {
 
 func validateSSHConfig(ts *TestSuite) ([]string, error) {
 	var hosts []string
-	for _, sshconfig := range ts.Configs {
-		if sshconfig.Hostname == "" {
+	for idx := range ts.Configs {
+		if ts.Configs[idx].Hostname == "" {
 			return nil, errors.New("ssh config: hostname cannot be empty")
 		}
-		if sshconfig.Username == "" {
+		if ts.Configs[idx].Username == "" {
 			return nil, errors.New("ssh config: username cannot be empty")
 		}
-		if sshconfig.Password == "" {
+		if ts.Configs[idx].Password == "" {
 			return nil, errors.New("ssh config: password cannot be empty")
 		}
-		hosts = append(hosts, sshconfig.Hostname)
+		hosts = append(hosts, ts.Configs[idx].Hostname)
 	}
 	return hosts, nil
 }

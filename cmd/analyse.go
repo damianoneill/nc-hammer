@@ -43,8 +43,8 @@ func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 	log.Println("")
 	log.Printf("Testsuite executed at %v\n", strings.Split(ts.File, string(filepath.Separator))[1])
 	var hosts []string
-	for _, config := range ts.Configs {
-		hosts = append(hosts, config.Hostname)
+	for idx := range ts.Configs {
+		hosts = append(hosts, ts.Configs[idx].Hostname)
 	}
 	log.Printf("Suite defined the following hosts: %v\n", hosts)
 
@@ -53,9 +53,9 @@ func analyseResults(cmd *cobra.Command, ts *suite.TestSuite, results []result.Ne
 
 	// get the largest when time from the results, this is the last action to run
 	var when float64
-	for _, result := range results {
-		if result.When > when {
-			when = result.When
+	for idx := range results {
+		if results[idx].When > when {
+			when = results[idx].When
 		}
 	}
 	executionTime := time.Duration(when) * time.Millisecond
@@ -96,15 +96,15 @@ func orderAndExcludeErrValues(results []result.NetconfResult, latencies map[stri
 	sortResults(results)
 
 	var errCount int
-	for _, result := range results {
-		if latencies[result.Hostname] == nil {
-			latencies[result.Hostname] = make(map[string][]float64)
+	for idx := range results {
+		if latencies[results[idx].Hostname] == nil {
+			latencies[results[idx].Hostname] = make(map[string][]float64)
 		}
 		// only add latency if its not in error
-		if result.Err != "" {
+		if results[idx].Err != "" {
 			errCount++
 		} else {
-			latencies[result.Hostname][result.Operation] = append(latencies[result.Hostname][result.Operation], result.Latency)
+			latencies[results[idx].Hostname][results[idx].Operation] = append(latencies[results[idx].Hostname][results[idx].Operation], results[idx].Latency)
 		}
 	}
 	return errCount
