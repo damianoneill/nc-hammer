@@ -34,7 +34,7 @@ func Test_runTestSuite(t *testing.T) {
 	myTs, err := suite.NewTestSuite("../suite/testdata/test-suite.yml")
 
 	if err != nil {
-		t.Errorf("Problem loading testdata/testsuite.yml: %v", err)
+		t.Errorf("Problem loading testdata/test-suite.yml: %v", err)
 	}
 
 	var buff bytes.Buffer
