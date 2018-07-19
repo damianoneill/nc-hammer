@@ -39,9 +39,9 @@ func analyseErrors(cmd *cobra.Command, ts *suite.TestSuite, results []result.Net
 	sortResults(results)
 
 	var errors [][]string
-	for _, result := range results {
-		if result.Err != "" {
-			errors = append(errors, []string{result.Hostname, result.Operation, result.Err})
+	for idx := range results {
+		if results[idx].Err != "" {
+			errors = append(errors, []string{results[idx].Hostname, results[idx].Operation, results[idx].Err})
 		}
 	}
 
