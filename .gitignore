@@ -15,3 +15,5 @@ nc-hammer
 results
 dist
 coverage.out
+.DS_Store
+.vscode
