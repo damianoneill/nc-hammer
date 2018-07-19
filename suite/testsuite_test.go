@@ -74,13 +74,13 @@ func TestNetconf_ToXMLString(t *testing.T) {
 		// TODO: Add test cases.
 		{"valid get-config", fields{"hostname", "get-config", nil, nil, nil, nil}, "<get-config><source><running/></source></get-config>", false},
 		{"valid get-config candidate source", fields{"hostname", "get-config", &candidate, nil, nil, nil}, "<get-config><source><candidate/></source></get-config>", false},
-		{"valid get-config filter", fields{"hostname", "get-config", nil, nil, &filter, nil}, "<get-config><source><running/></source><filter type=\"type\"><top><select/></top></filter></get-config>", false},
+		{"valid get-config filter", fields{"hostname", "get-config", nil, nil, &filter, nil}, "<get-config><source><running/></source><filter type=\"type\"><select/></filter></get-config>", false},
 		{"valid get-config filter with ns", fields{"hostname", "get-config", nil, nil, &filterWithNs, nil}, "<get-config><source><running/></source><filter type=\"type\"><top xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><select/></top></filter></get-config>", false},
 		{"not supported kill-session", fields{"hostname", "kill-session", nil, nil, nil, nil}, "", true},
 		{"valid get", fields{"hostname", "get", nil, nil, nil, nil}, "<get/>", false},
 		{"valid edit-config", fields{"hostname1", "edit-config", nil, nil, nil, nil}, "<edit-config><target><running/></target><config/></edit-config>", false},
 		{"valid edit-config2", fields{"hostname2", "edit-config", nil, &candidate, nil, &editOperation}, "<edit-config><target><candidate/></target><config><top xmlns=\"http://example.com/schema/1.2/config\"><interface><name>Ethernet0/0</name><mtu>1500</mtu></interface></top></config></edit-config>", false},
-		{"valid get with filter", fields{"hostname", "get", nil, nil, &filter, nil}, "<get><filter type=\"type\"><top><select/></top></filter></get>", false},
+		{"valid get with filter", fields{"hostname", "get", nil, nil, &filter, nil}, "<get><filter type=\"type\"><select/></filter></get>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

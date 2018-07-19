@@ -198,17 +198,19 @@ func addFilterIfPresent(n *Netconf, operation *etree.Element) {
 	if n.Filter != nil {
 		filter := operation.CreateElement("filter")
 		filter.CreateAttr("type", n.Filter.Type)
-		top := filter.CreateElement("top")
-		if n.Filter.Ns != nil {
-			top.CreateAttr("xmlns", *n.Filter.Ns)
-		}
 		//  https://github.com/beevik/etree/issues/49
 		inner := etree.NewDocument()
 		err := inner.ReadFromString(n.Filter.Select)
 		if err != nil {
 			log.Println("Filter Select is not valid xml")
 		}
-		top.AddChild(inner.Root().Copy())
+		if n.Filter.Ns != nil {
+			top := filter.CreateElement("top")
+			top.CreateAttr("xmlns", *n.Filter.Ns)
+			top.AddChild(inner.Root().Copy())
+		} else {
+			filter.AddChild(inner.Root().Copy())
+		}
 	}
 }
 
