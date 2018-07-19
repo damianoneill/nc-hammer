@@ -65,7 +65,7 @@ func Test_AnalyseErrorCmdRun(t *testing.T) {
 	}
 }
 func Test_AnalyseErrors(t *testing.T) {
-	results, myTs, err := result.UnarchiveResults("../suite/testdata/results/2018-07-18-19-56-01/")
+	results, myTs, err := result.UnarchiveResults("../suite/testdata/results_test/2018-07-18-19-56-01/")
 	if err != nil {
 		t.Error(err)
 	}
