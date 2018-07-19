@@ -55,5 +55,4 @@ func Test_runTestSuite(t *testing.T) {
 	want += "\n\nTestsuite completed in "
 	want = strings.TrimSpace(want)
 	assert.True(t, strings.Contains(got, want))
-
 }

@@ -11,16 +11,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/damianoneill/nc-hammer/suite"
-	"github.com/stretchr/testify/assert"
-
 	"github.com/damianoneill/nc-hammer/result"
+	"github.com/stretchr/testify/assert"
 )
 
 var myCmd = analyseErrorCmd
 
 func Test_Args(t *testing.T) {
-
 	t.Run("len(arg) != 1", func(t *testing.T) {
 		args := []string{}
 		errLen := strconv.Itoa(len(args))
@@ -59,42 +56,28 @@ func Test_Run(t *testing.T) {
 
 		args := []string{"../suite/testdata/"}
 		analyseErrorCmd.Run(myCmd, args)
-
 	})
-
 }
-
 func Test_anlyseErrors(t *testing.T) {
-
-	var testArray = []result.NetconfResult{
-		{5, 4, "172.26.138.91", "edit-config", 55282, "", 288},
-		{6, 859, "172.26.138.92", "get-config", 55943, "kill-session is not a supported operation", 176},
-		{4, 2322, "172.26.138.91", "get", 56967, "kill-session is not a supported operation", 420},
-		{4, 601, "172.26.138.93", "get", 59840, "session closed by remote side", 3320},
-		{4, 2322, "172.26.138.91", "get", 56967, "kill-session is not a supported operation", 420},
+	results, myTs, err := result.UnarchiveResults("../suite/testdata/")
+	if err != nil {
+		t.Error(err)
 	}
-
-	err := [][]string{
-		{"172.26.138.92", "get-config", "kill-session is not a supported operation"},
-		{"172.26.138.93", "get", "session closed by remote side"},
-		{"172.26.138.91", "get", "kill-session is not a supported operation"},
-		{"172.26.138.92", "kill-session", "session closed by remote side"},
+	var errors [][]string
+	for i := range results {
+		if results[i].Err != "" {
+			errors = append(errors, []string{results[i].Hostname, results[i].Operation, results[i].Err})
+		}
 	}
-
-	myTs := suite.TestSuite{}
-	myTs.File = "testdata/testsuite.yml"
-
 	var buff bytes.Buffer
-
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 	log.SetOutput(&buff)
 
-	analyseErrors(myCmd, &myTs, testArray)
+	analyseErrors(myCmd, myTs, results)
 
 	got := strings.TrimSpace(buff.String())
-	errLen := strconv.Itoa(len(err))
+	errLen := strconv.Itoa(len(errors))
 	want := strings.TrimSpace("Testsuite executed at " + strings.Split(myTs.File, string(filepath.Separator))[1] +
 		"\n" + "Total Number of Errors for suite: " + errLen)
 	assert.Equal(t, got, want, "failed not equal")
-
 }

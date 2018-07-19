@@ -38,9 +38,7 @@ func Test_completion(t *testing.T) {
 		if got != want {
 			t.Errorf("have '%s' but want '%s'", got, want)
 		}
-
 	})
-
 }
 func Test_Completion(t *testing.T) {
 	var err error

@@ -46,5 +46,4 @@ func Test_Version(t *testing.T) {
 	if want != got {
 		t.Errorf("wanted '%s', but got '%s'", want, got)
 	}
-
 }
