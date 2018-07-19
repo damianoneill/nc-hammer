@@ -9,10 +9,9 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
-
+.DS_Store
 vendor
 artifacts
 nc-hammer
-results
 dist
 coverage.out
