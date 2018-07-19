@@ -25,6 +25,12 @@ blocks:
       hostname: 172.22.22.91
       operation: get
       target: running
+- type: sequential
+  actions:
+  - netconf:
+      hostname: 172.22.22.91
+      operation: get
+      target: running
   - netconf:
       hostname: 172.22.22.92
       operation: get-config
