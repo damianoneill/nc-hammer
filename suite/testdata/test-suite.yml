@@ -1,0 +1,30 @@
+iterations: 0
+clients: 1
+rampup: 2
+configs:
+- hostname: 00.00.00.00
+  port: 830
+  username: user
+  password: pass
+  reuseconnection: true
+blocks:
+- type: init
+  actions:
+  - netconf:
+      hostname: 00.00.00.00
+      operation: get
+      target: running
+- type: concurrent
+  actions:
+  - netconf:
+      hostname: 00.00.00.00
+      operation: get
+      target: running
+- type: sequential
+  actions:
+  - netconf:
+      hostname: 00.00.00.00
+      operation: get
+      target: running
+- type: ""
+  actions: []
