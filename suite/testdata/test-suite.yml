@@ -1,38 +1,30 @@
-iterations: 10
-clients: 7
+iterations: 0
+clients: 1
 rampup: 2
 configs:
-- hostname: 172.22.22.91
-  port: 80
-  username: user
-  password: pass
-  reuseconnection: false
-- hostname: 172.22.22.92
+- hostname: 00.00.00.00
   port: 830
   username: user
   password: pass
-  reuseconnection: false
+  reuseconnection: true
 blocks:
 - type: init
   actions:
   - netconf:
-      hostname: 172.22.22.91
+      hostname: 00.00.00.00
       operation: get
       target: running
 - type: concurrent
   actions:
   - netconf:
-      hostname: 172.22.22.91
+      hostname: 00.00.00.00
       operation: get
       target: running
 - type: sequential
   actions:
   - netconf:
-      hostname: 172.22.22.91
+      hostname: 00.00.00.00
       operation: get
       target: running
-  - netconf:
-      hostname: 172.22.22.92
-      operation: get-config
-      target: running
+- type: ""
   actions: []

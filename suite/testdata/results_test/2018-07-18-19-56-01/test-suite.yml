@@ -1,4 +1,4 @@
-iterations: 10
+iterations: 0
 clients: 7
 rampup: 2
 configs:
@@ -35,4 +35,4 @@ blocks:
       hostname: 172.22.22.92
       operation: get-config
       target: running
-  actions: []
+  

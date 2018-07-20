@@ -14,13 +14,13 @@ import (
 )
 
 func Test_RunCmdArgs(t *testing.T) {
-	t.Run("len(arg) != 1", func(t *testing.T) {
+	t.Run("no args passed to RunCmd test", func(t *testing.T) {
 		args := []string{}
 		errLen := strconv.Itoa(len(args))
 		runCmd.Args(myCmd, args)
 		assert.Equal(t, runCmd.Args(myCmd, args), errors.New("run command requires a test suite file as an argument"), "failed"+errLen)
 	})
-	t.Run("len(arg) == 1", func(t *testing.T) {
+	t.Run("arg/path passed to RunCmd test ", func(t *testing.T) {
 		args := []string{"arg1"}
 		errLen := strconv.Itoa(len(args))
 		runCmd.Args(myCmd, args)
@@ -30,15 +30,15 @@ func Test_RunCmdArgs(t *testing.T) {
 
 func Test_runTestSuite(t *testing.T) {
 	start := time.Now()
-	myTs, err := suite.NewTestSuite("../suite/testdata/test-suite.yml")
-	if err != nil {
-		t.Errorf("Problem loading testdata/test-suite.yml: %v", err)
-	}
+	myTs, _ := suite.NewTestSuite("../suite/testdata/test-suite.yml")
+
 	var buff bytes.Buffer
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 	log.SetOutput(&buff)
+
 	block := myTs.GetInitBlock()
 	runTestSuite(myTs)
+
 	got := strings.Replace(buff.String(), "\n", "", -1)
 	want := "Testsuite " + myTs.File + " started at " + start.Format("Mon Jan _2 15:04:05 2006") +
 		"\n > " + strconv.Itoa(myTs.Clients) + " client(s), " +
