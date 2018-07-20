@@ -120,6 +120,8 @@ A simple response validator is included with the netconf action definition.  Thi
 
 For user unfamiliar with regex pattern matching, online tools such as [txt2re](https://txt2re.com) can really help.
 
+*NOTE* in the above example that the regex pattern must be wrapped in inverted commas.
+
 #### Init
 
 An init block is used to initialise the SUT, this is optional and is not required to execute a test suite.  If more than one init block is defined, the first one in the list is used.  The init block is executed once (regardless of number of clients or number of iterations), on suite startup before any other block is executed.
