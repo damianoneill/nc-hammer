@@ -311,3 +311,7 @@ Generate a PR from your fork to the damianoneill:origin/master
 ## Credits
 
 The design is heavily influenced by [gotling](https://github.com/eriklupander/gotling), thanks to Erik Lupander, for the following article http://callistaenterprise.se/blogg/teknik/2015/11/22/gotling/ 
+
+## Contributors
+
+* [Ahmed Keddar](https://github.com/bingobook02)
