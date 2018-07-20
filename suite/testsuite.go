@@ -117,8 +117,7 @@ func InlineXML(ts *TestSuite) error {
 	for _, block := range ts.Blocks {
 		for _, action := range block.Actions {
 			if action.Netconf != nil {
-				switch action.Netconf.Operation {
-				case "edit-config":
+				if action.Netconf.Operation == "edit-config" {
 					if action.Netconf.Config != nil {
 						if strings.HasPrefix(*action.Netconf.Config, "file:") {
 							if _, ok := snippets[*action.Netconf.Config]; !ok {
@@ -152,8 +151,8 @@ func readXMLSnippet(filename string) ([]byte, error) {
 	// nolint
 	defer xmlFile.Close()
 
-	XMLdata, err := ioutil.ReadAll(xmlFile)
-	return XMLdata, err
+	b, err := ioutil.ReadAll(xmlFile)
+	return b, err
 }
 
 // ToXMLString generates a XML representation of the information provided in the Netconf section of the TestSuite

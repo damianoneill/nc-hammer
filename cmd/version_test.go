@@ -41,7 +41,7 @@ func Test_Version(t *testing.T) {
 	w.Close()
 	out, _ := ioutil.ReadAll(r)
 	os.Stdout = rescueStdout
-	got := strings.TrimSpace(string(out[:]))
+	got := strings.TrimSpace(string(out))
 	want := RootCmd.Use + " version"
 	if want != got {
 		t.Errorf("wanted '%s', but got '%s'", want, got)

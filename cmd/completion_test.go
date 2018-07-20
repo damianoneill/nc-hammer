@@ -17,7 +17,7 @@ func readCompletionOutput(err error, args ...string) string {
 	write.Close()
 	out, _ := ioutil.ReadAll(read)
 	os.Stdout = oldStdout
-	got := strings.TrimSpace(string(out[:]))
+	got := strings.TrimSpace(string(out))
 	return got
 }
 func Test_completion(t *testing.T) {
