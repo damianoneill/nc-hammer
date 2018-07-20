@@ -293,6 +293,13 @@ Fork the repository and setup a remote to your fork.
 ```sh
 git remote add <yourid> git@github.com:<yourid>/nc-hammer.git
 ```
+
+Use the git pre-commit hook to ensure the linter passes
+
+```sh
+cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+```
+
 Create a branch, make your changes and push your branch to your fork.
 
 ```sh
