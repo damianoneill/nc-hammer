@@ -1,0 +1,22 @@
+iterations: 0
+clients: 1
+rampup: 2
+configs:
+- hostname: 00.00.00.02
+  port: 803
+  username: user
+  password: pass
+  reuseconnection: false
+blocks:
+- type: init
+  actions:
+  - failme:
+      duration: 5 
+  - failme:
+      duration: 5 
+  - failme:
+      duration: 5 
+  - failme:
+      duration: 5 
+  - failme:
+      duration: 5 

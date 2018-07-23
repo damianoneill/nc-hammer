@@ -23,7 +23,7 @@ func readCompletionOutput(err error, args ...string) string {
 func Test_completion(t *testing.T) {
 	var err error
 	t.Run("err is nil", func(t *testing.T) {
-		got := readCompletionOutput(err, "arg1", "arg2")
+		got := readCompletionOutput(err, "/etc/bash_completion")
 		want := "Bash completion file for " + RootCmd.Use + " saved to " + completionTarget
 		if got != want {
 			t.Errorf("have '%s' but want '%s'", got, want)
@@ -31,7 +31,7 @@ func Test_completion(t *testing.T) {
 	})
 	t.Run("error is not nil", func(t *testing.T) {
 		var err = errors.New("my error")
-		got := readCompletionOutput(err, "arg1", "arg2")
+		got := readCompletionOutput(err, "/etc/bash_completion")
 		want := err.Error()
 		if got != want {
 			t.Errorf("have '%s' but want '%s'", got, want)

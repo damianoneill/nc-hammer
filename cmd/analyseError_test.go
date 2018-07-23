@@ -21,15 +21,13 @@ var myCmd = analyseErrorCmd
 func Test_AnalyseErrorCmdArgs(t *testing.T) {
 	t.Run("test that a directory is not passed to the command", func(t *testing.T) {
 		args := []string{}
-		errLen := strconv.Itoa(len(args))
 		analyseErrorCmd.Args(myCmd, args)
-		assert.Equal(t, analyseErrorCmd.Args(myCmd, args), errors.New("error command requires a test results directory as an argument"), "failed"+errLen)
+		assert.Equal(t, analyseErrorCmd.Args(myCmd, args), errors.New("error command requires a test results directory as an argument"), "failed")
 	})
 	t.Run("test that a directory is passed to the command", func(t *testing.T) {
-		args := []string{"arg1"}
-		errLen := strconv.Itoa(len(args))
+		args := []string{"../results/2018-07-18-19-56-01/"}
 		analyseErrorCmd.Args(myCmd, args)
-		assert.Equal(t, analyseErrorCmd.Args(myCmd, args), nil, "failed"+errLen)
+		assert.Equal(t, analyseErrorCmd.Args(myCmd, args), nil, "failed")
 	})
 }
 func Test_AnalyseErrorCmdRun(t *testing.T) {
@@ -64,8 +62,8 @@ func Test_AnalyseErrorCmdRun(t *testing.T) {
 		t.Fatalf("Process ran with err %v, want exit status 1", err)
 	}
 }
-func Test_AnalyseErrors(t *testing.T) {
-	results, myTs, err := result.UnarchiveResults("../suite/testdata/results_test/2018-07-18-19-56-01/")
+func Test_analyseErrors(t *testing.T) {
+	results, ts, err := result.UnarchiveResults("../suite/testdata/results_test/2018-07-18-19-56-01/")
 	if err != nil {
 		t.Error(err)
 	}
@@ -79,11 +77,11 @@ func Test_AnalyseErrors(t *testing.T) {
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 	log.SetOutput(&buff)
 
-	analyseErrors(myCmd, myTs, results)
+	analyseErrors(myCmd, ts, results)
 
 	got := strings.TrimSpace(buff.String())
 	errLen := strconv.Itoa(len(errors))
-	want := strings.TrimSpace("Testsuite executed at " + strings.Split(myTs.File, string(filepath.Separator))[1] +
+	want := strings.TrimSpace("Testsuite executed at " + strings.Split(ts.File, string(filepath.Separator))[1] +
 		"\n" + "Total Number of Errors for suite: " + errLen)
 	if got != want {
 		t.Errorf("wanted, '%s', but got '%s'", want, got)

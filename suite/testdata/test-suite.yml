@@ -1,4 +1,4 @@
-iterations: 0
+iterations: 3
 clients: 1
 rampup: 2
 configs:
@@ -14,17 +14,18 @@ blocks:
       hostname: 00.00.00.00
       operation: get
       target: running
+  - sleep:
+      duration: 5
 - type: concurrent
   actions:
-  - netconf:
-      hostname: 00.00.00.00
-      operation: get
-      target: running
+  - sleep:
+      duration: 5
 - type: sequential
   actions:
   - netconf:
       hostname: 00.00.00.00
       operation: get
       target: running
-- type: ""
-  actions: []
+  - sleep:
+      duration: 5
+actions: []
