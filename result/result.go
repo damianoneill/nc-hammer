@@ -16,6 +16,7 @@ import (
 type NetconfResult struct {
 	Client    int
 	SessionID int
+	MessageID string
 	Hostname  string
 	Operation string
 	When      float64

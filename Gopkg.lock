@@ -2,10 +2,10 @@
 
 
 [[projects]]
+  branch = "master"
   name = "github.com/Juniper/go-netconf"
   packages = ["netconf"]
-  revision = "a2b17df81b3cb517c0f0e0498ba30b999da16868"
-  version = "v0.1.1"
+  revision = "ecb605886691227fdb469b26675560046ee8bab9"
 
 [[projects]]
   name = "github.com/beevik/etree"
@@ -157,12 +157,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/ziutek/telnet"
-  packages = ["."]
-  revision = "c3b780dc415b28894076b4ec975ea3ea69e3980f"
-
-[[projects]]
-  branch = "master"
   name = "golang.org/x/crypto"
   packages = [
     "curve25519",
@@ -224,6 +218,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b043c77ddf280f5ac3436fde1c6da29d0496d043717afbd6ce887fcf20e30971"
+  inputs-digest = "175c0d5b3b7ff35d8557fb589f8432430fd667bfa76e9326be9f9ba6186fe68f"
   solver-name = "gps-cdcl"
   solver-version = 1

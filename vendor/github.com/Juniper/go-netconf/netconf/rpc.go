@@ -1,9 +1,17 @@
+// Go NETCONF Client
+//
+// Copyright (c) 2013-2018, Juniper Networks, Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package netconf
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/xml"
 	"fmt"
+	"io"
 )
 
 // RPCMessage represents an RPC Message to be sent.
@@ -15,7 +23,7 @@ type RPCMessage struct {
 // NewRPCMessage generates a new RPC Message structure with the provided methods
 func NewRPCMessage(methods []RPCMethod) *RPCMessage {
 	return &RPCMessage{
-		MessageID: uuid(),
+		MessageID: msgID(),
 		Methods:   methods,
 	}
 }
@@ -44,11 +52,34 @@ func (m *RPCMessage) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 
 // RPCReply defines a reply to a RPC request
 type RPCReply struct {
-	XMLName  xml.Name   `xml:"rpc-reply"`
-	Errors   []RPCError `xml:"rpc-error,omitempty"`
-	Data     string     `xml:",innerxml"`
-	Ok       bool       `xml:",omitempty"`
-	RawReply string     `xml:"-"`
+	XMLName   xml.Name   `xml:"rpc-reply"`
+	Errors    []RPCError `xml:"rpc-error,omitempty"`
+	Data      string     `xml:",innerxml"`
+	Ok        bool       `xml:",omitempty"`
+	RawReply  string     `xml:"-"`
+	MessageID string     `xml:"-"`
+}
+
+func newRPCReply(rawXML []byte, ErrOnWarning bool, messageID string) (*RPCReply, error) {
+	reply := &RPCReply{}
+	reply.RawReply = string(rawXML)
+
+	if err := xml.Unmarshal(rawXML, reply); err != nil {
+		return nil, err
+	}
+
+	// will return a valid reply so setting Requests message id
+	reply.MessageID = messageID
+
+	if reply.Errors != nil {
+		for _, rpcErr := range reply.Errors {
+			if rpcErr.Severity == "error" || ErrOnWarning {
+				return reply, &rpcErr
+			}
+		}
+	}
+
+	return reply, nil
 }
 
 // RPCError defines an error reply to a RPC request
@@ -92,4 +123,15 @@ func MethodUnlock(target string) RawMethod {
 // MethodGetConfig files a NETCONF get-config source request with the remote host
 func MethodGetConfig(source string) RawMethod {
 	return RawMethod(fmt.Sprintf("<get-config><source><%s/></source></get-config>", source))
+}
+
+var msgID = uuid
+
+// uuid generates a "good enough" uuid without adding external dependencies
+func uuid() string {
+	b := make([]byte, 16)
+	io.ReadFull(rand.Reader, b)
+	b[6] = (b[6] & 0x0f) | 0x40
+	b[8] = (b[8] & 0x3f) | 0x80
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
 }

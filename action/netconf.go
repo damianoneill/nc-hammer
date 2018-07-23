@@ -81,6 +81,8 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 	result.When = float64(time.Since(tsStart).Nanoseconds() / int64(time.Millisecond))
 	result.Latency = float64(elapsed.Nanoseconds() / int64(time.Millisecond))
 
+	result.MessageID = rpcReply.MessageID
+
 	if action.Netconf.Expected != nil {
 		match, err := regexp.MatchString(*action.Netconf.Expected, rpcReply.Data)
 		if err != nil {

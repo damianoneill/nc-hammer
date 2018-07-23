@@ -1,3 +1,9 @@
+// Go NETCONF Client
+//
+// Copyright (c) 2013-2018, Juniper Networks, Inc. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package netconf
 
 import (
@@ -40,11 +46,7 @@ func (t *TransportSSH) Close() error {
 	}
 
 	// Close the socket
-	if err := t.sshClient.Close(); err != nil {
-		return err
-	}
-
-	return nil
+	return t.sshClient.Close()
 }
 
 // Dial connects and establishes SSH sessions
@@ -95,12 +97,7 @@ func (t *TransportSSH) setupSession() error {
 	}
 
 	t.ReadWriteCloser = NewReadWriteCloser(reader, writer)
-
-	if err := t.sshSession.RequestSubsystem(sshNetconfSubsystem); err != nil {
-		return err
-	}
-
-	return nil
+	return t.sshSession.RequestSubsystem(sshNetconfSubsystem)
 }
 
 // NewSSHSession creates a new NETCONF session using an existing net.Conn.

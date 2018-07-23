@@ -41,7 +41,7 @@ func analyseErrors(cmd *cobra.Command, ts *suite.TestSuite, results []result.Net
 	var errors [][]string
 	for idx := range results {
 		if results[idx].Err != "" {
-			errors = append(errors, []string{results[idx].Hostname, results[idx].Operation, results[idx].Err})
+			errors = append(errors, []string{results[idx].Hostname, results[idx].Operation, results[idx].MessageID, results[idx].Err})
 		}
 	}
 
@@ -50,7 +50,7 @@ func analyseErrors(cmd *cobra.Command, ts *suite.TestSuite, results []result.Net
 	var table = tablewriter.NewWriter(os.Stdout)
 	table.SetReflowDuringAutoWrap(true)
 	table.SetColWidth(80)
-	renderTable(table, []string{"Hostname", "Operation", "Error"}, &errors)
+	renderTable(table, []string{"Hostname", "Operation", "Message ID", "Error"}, &errors)
 
 	table.Render()
 }
