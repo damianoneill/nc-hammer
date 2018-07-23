@@ -253,11 +253,7 @@ Total Number of Errors for suite: 2
 
 ## Build
 
-You should have a working go environment, packages are managed by [vgo](https://github.com/golang/go/wiki/vgo-user-guide).  This includes support for at least go v1.10.x.
-
-```sh
-go get -u golang.org/x/vgo
-```
+You should have a working go environment.  This includes support for at least go v1.10.x.
 
 Now get the code
 
@@ -268,16 +264,15 @@ go get -u github.com/damianoneill/nc-hammer
 This will place the code in your GOPATH at
 
 ```sh
-$ ls $GOPATH/src/github.com/damianoneill/nc-hammer
-LICENSE   README.md action    cmd       go.mod    img       main.go   result    suite
+$ ls
+Gopkg.lock Gopkg.toml LICENSE    README.md  action     cmd       hooks      img        main.go    result     results    suite      vendor
 ```
 
-There is an issue at the moment with vgo, regarding one of the sub projects version, so for the meantime we use the packages defined in go.mod definition to install the latest into GOPATH for building.
+You can use the standard go tools for e.g. 
 
 ```sh
 $ cd $GOPATH/src/github.com/damianoneill/nc-hammer
-$ vgo list -m | awk '{ print $1 }' | grep -v MODULE | xargs go get -u
-$ go build
+$ go install
 ```
 
 ## Contributing

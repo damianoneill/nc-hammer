@@ -12,8 +12,6 @@ git:
   depth: 1
 
 before_script:
-  - go get -u golang.org/x/vgo
-  - vgo list -m | awk '{ print $1 }' | grep -v MODULE | xargs go get -u
   - go get -u github.com/golangci/golangci-lint/cmd/golangci-lint
   - go get -u github.com/mattn/goveralls
   - go get -u github.com/alecthomas/gometalinter
