@@ -26,8 +26,6 @@ var runCmd = &cobra.Command{
 		if ts, err := suite.NewTestSuite(args[0]); err != nil {
 			log.Fatalf("Problem with YAML file: %v ", err)
 		} else {
-			// nolint
-			action.Timeout, _ = cmd.Flags().GetInt("timeout")
 			runTestSuite(ts)
 		}
 	},
@@ -103,5 +101,4 @@ func handleBlocks(start time.Time, ts *suite.TestSuite, cID int, clientWg *sync.
 
 func init() {
 	RootCmd.AddCommand(runCmd)
-	runCmd.Flags().Int("timeout", 30, "NETCONF Timeout in Seconds")
 }

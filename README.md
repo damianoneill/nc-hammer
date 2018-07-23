@@ -200,7 +200,7 @@ scenario1
 A Test Suite run can be executed as follows, note that as the suite runs, it will write a '.' to the screen to indicate a succesful NETCONF Request and a 'E' to indicate an Error.
 
 ```sh
-$ nc-hammer run --timeout 60 test-suite.yml
+$ nc-hammer run test-suite.yml
 Testsuite /Users/doneill/scenario1/test-suite.yml started at Tue Jun 19 10:55:33 2018
  > 5 client(s) started, 10 iterations per client, 0 seconds wait between starting each client
 .................E................E...............
