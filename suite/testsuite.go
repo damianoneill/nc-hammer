@@ -83,7 +83,7 @@ type TestSuite struct {
 
 // NewTestSuite returns an TestSuite initialized from a yaml file
 func NewTestSuite(file string) (*TestSuite, error) {
-	yamlFile, err := ioutil.ReadFile(file)
+	yamlFile, err := ioutil.ReadFile(file) // #nosec
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func InlineXML(ts *TestSuite) error {
 }
 
 func readXMLSnippet(filename string) ([]byte, error) {
-	xmlFile, err := os.Open(filename)
+	xmlFile, err := os.Open(filename) // #nosec
 	if err != nil {
 		return nil, err
 	}

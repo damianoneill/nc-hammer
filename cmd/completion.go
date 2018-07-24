@@ -59,6 +59,6 @@ func init() {
 	RootCmd.AddCommand(completionCmd)
 
 	completionCmd.PersistentFlags().StringVarP(&completionTarget, "completionfile", "", "/etc/bash_completion.d/"+RootCmd.Use+".sh", "completion file")
-	// Required for bash-completion
+	// nolint Required for bash-completion
 	_ = completionCmd.PersistentFlags().SetAnnotation("completionfile", cobra.BashCompFilenameExt, []string{})
 }
