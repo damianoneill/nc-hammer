@@ -15,47 +15,49 @@ import (
 
 // Sshconfig defines a definition for the parameters required to connect to a NETCONF Agent via SSH
 type Sshconfig struct {
-	Hostname        string
-	Port            int
-	Username        string
-	Password        string
-	Reuseconnection bool
+	Hostname        string `json:"hostname" yaml:"hostname"`
+	Port            int    `json:"port" yaml:"port"`
+	Username        string `json:"username" yaml:"username"`
+	Password        string `json:"password" yaml:"password"`
+	Reuseconnection bool   `json:"reuseconnection" yaml:"reuseconnection"`
 }
 
 // Filter defines the parameters required to generate a subtree or xpath filter within a NETCONF Request
 type Filter struct {
-	Type   string
-	Ns     *string `json:",omitempty" yaml:",omitempty"`
-	Select string
+	Type   string  `json:"type" yaml:"type"`
+	Ns     *string `json:"ns,omitempty" yaml:"ns,omitempty"`
+	Select string  `json:"select" yaml:"select"`
 }
 
 // Netconf struct contains information required to construct a valid NETCONF Operation.
 // Addresses are used to indicate optional content
 type Netconf struct {
-	Hostname  string
-	Operation string
-	Source    *string `json:",omitempty" yaml:",omitempty"`
-	Target    *string `json:",omitempty" yaml:",omitempty"`
-	Filter    *Filter `json:",omitempty" yaml:",omitempty"`
-	Config    *string `json:",omitempty" yaml:",omitempty"` // used in the edit-config, starts with the top element
-	Expected  *string `json:",omitempty" yaml:",omitempty"`
+	Hostname  string  `json:"hostname" yaml:"hostname"`
+	Message   *string `json:"message,omitempty" yaml:"message,omitempty"`
+	Method    *string `json:"method,omitempty" yaml:"method,omitempty"`
+	Operation *string `json:"operation,omitempty" yaml:"operation,omitempty"`
+	Source    *string `json:"source,omitempty" yaml:"source,omitempty"`
+	Target    *string `json:"target,omitempty" yaml:"target,omitempty"`
+	Filter    *Filter `json:"filter,omitempty" yaml:"filter,omitempty"`
+	Config    *string `json:"config,omitempty" yaml:"config,omitempty"`
+	Expected  *string `json:"expected,omitempty" yaml:"expected,omitempty"`
 }
 
 // Sleep is an action instructing the client to sleep for the period defined in duration
 type Sleep struct {
-	Duration int // seconds
+	Duration int `json:"duration" yaml:"duration"` // seconds
 }
 
 // Action is a wrapper for the different actions types (netconf, sleep)
 type Action struct {
-	Netconf *Netconf `json:",omitempty" yaml:",omitempty"`
-	Sleep   *Sleep   `json:",omitempty" yaml:",omitempty"`
+	Netconf *Netconf `json:"netconf,omitempty" yaml:"netconf,omitempty"`
+	Sleep   *Sleep   `json:"sleep,omitempty" yaml:"sleep,omitempty"`
 }
 
 // Block describes a list of actions and how these should treated; as an init block, sequentially or concurrently
 type Block struct {
-	Type    string
-	Actions []Action
+	Type    string   `json:"type" yaml:"type"`
+	Actions []Action `json:"actions" yaml:"actions"`
 }
 
 // Configs rebinds the slice of Sshconfig so that methods can be constructed against it
@@ -73,12 +75,12 @@ func (c Configs) IsReuseConnection(hostname string) bool {
 
 // TestSuite is the top level struct for the yaml document definition
 type TestSuite struct {
-	File       string `json:"-" yaml:"-"`
-	Iterations int
-	Clients    int
-	Rampup     int
-	Configs    Configs
-	Blocks     []Block
+	File       string  `json:"-" yaml:"-"`
+	Iterations int     `json:"iterations" yaml:"iterations"`
+	Clients    int     `json:"clients" yaml:"clients"`
+	Rampup     int     `json:"rampup" yaml:"rampup"`
+	Configs    Configs `json:"configs" yaml:"configs"`
+	Blocks     []Block `json:"blocks" yaml:"blocks"`
 }
 
 // NewTestSuite returns an TestSuite initialized from a yaml file
@@ -117,7 +119,7 @@ func InlineXML(ts *TestSuite) error {
 	for _, block := range ts.Blocks {
 		for _, action := range block.Actions {
 			if action.Netconf != nil {
-				if action.Netconf.Operation == "edit-config" {
+				if *action.Netconf.Operation == "edit-config" {
 					if action.Netconf.Config != nil {
 						if strings.HasPrefix(*action.Netconf.Config, "file:") {
 							if _, ok := snippets[*action.Netconf.Config]; !ok {
@@ -158,8 +160,8 @@ func readXMLSnippet(filename string) ([]byte, error) {
 // ToXMLString generates a XML representation of the information provided in the Netconf section of the TestSuite
 func (n *Netconf) ToXMLString() (string, error) {
 	doc := etree.NewDocument()
-	operation := doc.CreateElement(n.Operation)
-	switch n.Operation {
+	operation := doc.CreateElement(*n.Operation)
+	switch *n.Operation {
 	case "get-config":
 		source := operation.CreateElement("source")
 		if n.Source != nil {
@@ -187,7 +189,7 @@ func (n *Netconf) ToXMLString() (string, error) {
 			config.AddChild(inner.Root().Copy())
 		}
 	default:
-		return "", errors.New(n.Operation + " is not a supported operation")
+		return "", errors.New(*n.Operation + " is not a supported operation")
 
 	}
 	return doc.WriteToString()
@@ -246,7 +248,7 @@ func validateTestSuite(ts *TestSuite) error {
 	for _, block := range ts.Blocks {
 		for _, action := range block.Actions {
 			if action.Netconf != nil {
-				if action.Netconf.Operation == "" {
+				if *action.Netconf.Operation == "" {
 					return errors.New("netconf: operation cannot be empty")
 				}
 				if !StringInSlice(action.Netconf.Hostname, hosts) {

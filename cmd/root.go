@@ -63,3 +63,7 @@ func InitConfig() {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 }
+
+// StringAddr is a helper routine that allocates a new string value
+// to store v and returns a pointer to it.
+func StringAddr(v string) *string { return &v }

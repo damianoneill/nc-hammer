@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/damianoneill/nc-hammer/cmd"
 	"github.com/damianoneill/nc-hammer/suite"
 	"github.com/stretchr/testify/assert"
 )
@@ -59,7 +60,7 @@ func TestNetconf_ToXMLString(t *testing.T) {
 	filterWithNs := suite.Filter{Type: "type", Ns: &ns, Select: "<select/>"}
 	type fields struct {
 		Hostname  string
-		Operation string
+		Operation *string
 		Source    *string
 		Target    *string
 		Filter    *suite.Filter
@@ -72,15 +73,15 @@ func TestNetconf_ToXMLString(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{"valid get-config", fields{"hostname", "get-config", nil, nil, nil, nil}, "<get-config><source><running/></source></get-config>", false},
-		{"valid get-config candidate source", fields{"hostname", "get-config", &candidate, nil, nil, nil}, "<get-config><source><candidate/></source></get-config>", false},
-		{"valid get-config filter", fields{"hostname", "get-config", nil, nil, &filter, nil}, "<get-config><source><running/></source><filter type=\"type\"><select/></filter></get-config>", false},
-		{"valid get-config filter with ns", fields{"hostname", "get-config", nil, nil, &filterWithNs, nil}, "<get-config><source><running/></source><filter type=\"type\"><top xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><select/></top></filter></get-config>", false},
-		{"not supported kill-session", fields{"hostname", "kill-session", nil, nil, nil, nil}, "", true},
-		{"valid get", fields{"hostname", "get", nil, nil, nil, nil}, "<get/>", false},
-		{"valid edit-config", fields{"hostname1", "edit-config", nil, nil, nil, nil}, "<edit-config><target><running/></target><config/></edit-config>", false},
-		{"valid edit-config2", fields{"hostname2", "edit-config", nil, &candidate, nil, &editOperation}, "<edit-config><target><candidate/></target><config><top xmlns=\"http://example.com/schema/1.2/config\"><interface><name>Ethernet0/0</name><mtu>1500</mtu></interface></top></config></edit-config>", false},
-		{"valid get with filter", fields{"hostname", "get", nil, nil, &filter, nil}, "<get><filter type=\"type\"><select/></filter></get>", false},
+		{"valid get-config", fields{"hostname", cmd.StringAddr("get-config"), nil, nil, nil, nil}, "<get-config><source><running/></source></get-config>", false},
+		{"valid get-config candidate source", fields{"hostname", cmd.StringAddr("get-config"), &candidate, nil, nil, nil}, "<get-config><source><candidate/></source></get-config>", false},
+		{"valid get-config filter", fields{"hostname", cmd.StringAddr("get-config"), nil, nil, &filter, nil}, "<get-config><source><running/></source><filter type=\"type\"><select/></filter></get-config>", false},
+		{"valid get-config filter with ns", fields{"hostname", cmd.StringAddr("get-config"), nil, nil, &filterWithNs, nil}, "<get-config><source><running/></source><filter type=\"type\"><top xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><select/></top></filter></get-config>", false},
+		{"not supported kill-session", fields{"hostname", cmd.StringAddr("kill-session"), nil, nil, nil, nil}, "", true},
+		{"valid get", fields{"hostname", cmd.StringAddr("get"), nil, nil, nil, nil}, "<get/>", false},
+		{"valid edit-config", fields{"hostname1", cmd.StringAddr("edit-config"), nil, nil, nil, nil}, "<edit-config><target><running/></target><config/></edit-config>", false},
+		{"valid edit-config2", fields{"hostname2", cmd.StringAddr("edit-config"), nil, &candidate, nil, &editOperation}, "<edit-config><target><candidate/></target><config><top xmlns=\"http://example.com/schema/1.2/config\"><interface><name>Ethernet0/0</name><mtu>1500</mtu></interface></top></config></edit-config>", false},
+		{"valid get with filter", fields{"hostname", cmd.StringAddr("get"), nil, nil, &filter, nil}, "<get><filter type=\"type\"><select/></filter></get>", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -151,7 +152,7 @@ func TestTestSuite_GetInitBlock(t *testing.T) {
 	}
 	block := got.GetInitBlock()
 	assert.NotNil(t, block)
-	assert.Equal(t, block.Actions[0].Netconf.Operation, "edit-config", "they should be equal")
+	assert.Equal(t, *block.Actions[0].Netconf.Operation, "edit-config", "they should be equal")
 }
 
 func Test_StringInSlice(t *testing.T) {

@@ -66,13 +66,13 @@ func BuildTestSuite(path string) *suite.TestSuite {
 
 	initBlock := suite.Block{Type: "init", Actions: []suite.Action{}}
 	config := "file:" + filepath.Join("snippets", "edit-config.xml")
-	editAction := suite.Action{Netconf: &suite.Netconf{Hostname: "10.0.0.1", Operation: "edit-config", Source: nil, Target: nil, Filter: nil, Config: &config}, Sleep: nil}
+	editAction := suite.Action{Netconf: &suite.Netconf{Hostname: "10.0.0.1", Operation: StringAddr("edit-config"), Source: nil, Target: nil, Filter: nil, Config: &config}, Sleep: nil}
 	initBlock.Actions = []suite.Action{editAction}
 
 	concurrentBlock := suite.Block{Type: "concurrent", Actions: []suite.Action{}}
 	namespace := "http://example.com/schema/1.2/config"
 	filter := suite.Filter{Type: "subtree", Ns: &namespace, Select: "<users/>"}
-	getConfigAction := suite.Action{Netconf: &suite.Netconf{Hostname: "10.0.0.1", Operation: "get-config", Source: nil, Target: nil, Filter: &filter, Config: nil}, Sleep: nil}
+	getConfigAction := suite.Action{Netconf: &suite.Netconf{Hostname: "10.0.0.1", Operation: StringAddr("get-config"), Source: nil, Target: nil, Filter: &filter, Config: nil}, Sleep: nil}
 	concurrentBlock.Actions = []suite.Action{getConfigAction}
 	ts.Blocks = []suite.Block{initBlock, concurrentBlock}
 

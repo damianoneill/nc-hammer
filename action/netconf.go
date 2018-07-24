@@ -32,7 +32,7 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 	var result result.NetconfResult
 	result.Client = cID
 	result.Hostname = action.Netconf.Hostname
-	result.Operation = action.Netconf.Operation
+	result.Operation = *action.Netconf.Operation
 
 	session, err := getSession(cID, config.Hostname+":"+strconv.Itoa(config.Port), config.Username, config.Password, config.Reuseconnection)
 	if err != nil {
