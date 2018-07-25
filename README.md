@@ -4,6 +4,7 @@
 [![GitHub release](https://img.shields.io/github/release/damianoneill/nc-hammer.svg)](https://github.com/damianoneill/nc-hammer/releases)
 [![Go Report Card](https://goreportcard.com/badge/damianoneill/nc-hammer)](http://goreportcard.com/report/damianoneill/nc-hammer)
 [![license](https://img.shields.io/github/license/damianoneill/nc-hammer.svg)](https://github.com/damianoneill/nc-hammer/blob/master/LICENSE)
+[![Coverage Status](https://coveralls.io/repos/github/damianoneill/nc-hammer/badge.svg?branch=master)](https://coveralls.io/github/damianoneill/nc-hammer?branch=master)
 
 If you don't have a Go evnironment setup, you can __download a binary__ from the [releases](https://github.com/damianoneill/nc-hammer/releases) page, I suggest you place this somewhere in an existing bin path.
 
@@ -310,3 +311,4 @@ The design is heavily influenced by [gotling](https://github.com/eriklupander/go
 ## Contributors
 
 * [Ahmed Keddar](https://github.com/bingobook02)
+* [Patrick Concannon](https://github.com/patrickconcannon)
