@@ -12,8 +12,8 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-// initCmd represents the init command
-var initCmd = &cobra.Command{
+// InitCmd represents the init command
+var InitCmd = &cobra.Command{
 	Use:   "init <directory>",
 	Short: "Scaffold a Test Suite and snippets directory",
 	Args: func(cmd *cobra.Command, args []string) error {
@@ -37,10 +37,11 @@ var initCmd = &cobra.Command{
 		}
 
 		// write out TestSuite Scaffold
-		bytes, err := yaml.Marshal(buildTestSuite(path))
+		bytes, err := yaml.Marshal(BuildTestSuite(path))
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		err = ioutil.WriteFile(filepath.Join(args[0], "test-suite.yml"), bytes, 0644)
 		if err != nil {
 			log.Fatal(err)
@@ -55,7 +56,8 @@ var initCmd = &cobra.Command{
 	},
 }
 
-func buildTestSuite(path string) *suite.TestSuite {
+// BuildTestSuite Creates TestSuite scaffold files
+func BuildTestSuite(path string) *suite.TestSuite {
 	var ts suite.TestSuite
 	ts.Iterations = 5
 	ts.Clients = 2
@@ -78,5 +80,5 @@ func buildTestSuite(path string) *suite.TestSuite {
 }
 
 func init() {
-	RootCmd.AddCommand(initCmd)
+	RootCmd.AddCommand(InitCmd)
 }
