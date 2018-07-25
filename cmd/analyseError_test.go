@@ -31,38 +31,54 @@ func Test_AnalyseErrorCmdArgs(t *testing.T) {
 	})
 }
 func Test_AnalyseErrorCmdRun(t *testing.T) {
-	// pathArgs used to give an error
-	if os.Getenv("BE_CRASHER") == "1" {
-		log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
-		pathArgs := []string{"error/2018-07-18-19-56-01/"}
+	t.Run("test that a wrong path is passed as arg", func(t *testing.T) {
+		// pathArgs used to give an error
+		if os.Getenv("BE_CRASHER") == "1" {
+			log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+			pathArgs := []string{"error/2018-07-18-19-56-01/"}
+			analyseErrorCmd.Run(myCmd, pathArgs)
+			return
+		}
+
+		// Start the actual test in a different subprocess
+		cmd := exec.Command(os.Args[0], "-test.run=Test_AnalyseErrorCmdRun")
+		cmd.Env = append(os.Environ(), "BE_CRASHER=1")
+		stdout, _ := cmd.StderrPipe()
+		if err := cmd.Start(); err != nil {
+			t.Fatal(err)
+		}
+
+		// Check that the log fatal message is what we expected
+		gotBytes, _ := ioutil.ReadAll(stdout)
+		got := string(gotBytes)
+		_, _, errReturned := result.UnarchiveResults("error/2018-07-18-19-56-01/") // get err that triggered fatalf
+		expected := "Problem with loading result information: " + errReturned.Error() + " "
+		if !strings.HasSuffix(got[:len(got)-1], expected) {
+			t.Fatalf("Unexpected log message. Got '%s' but should contain '%s'", got[:len(got)-1], expected)
+		}
+
+		// Check that the program exited
+		err := cmd.Wait()
+		if e, ok := err.(*exec.ExitError); !ok || e.Success() {
+			t.Fatalf("Process ran with err %v, want exit status 1", err)
+		}
+	})
+	t.Run("test that a correct path is passed as arg", func(t *testing.T) {
+		pathArgs := []string{"../suite/testdata/results_test/2018-07-18-19-56-01/"}
+		_, _, err := result.UnarchiveResults(pathArgs[0])
 		analyseErrorCmd.Run(myCmd, pathArgs)
-		return
-	}
+		assert.Nil(t, err)
 
-	// Start the actual test in a different subprocess
-	cmd := exec.Command(os.Args[0], "-test.run=Test_AnalyseErrorCmdRun")
-	cmd.Env = append(os.Environ(), "BE_CRASHER=1")
-	stdout, _ := cmd.StderrPipe()
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err)
-	}
-
-	// Check that the log fatal message is what we expected
-	gotBytes, _ := ioutil.ReadAll(stdout)
-	got := string(gotBytes)
-	_, _, errReturned := result.UnarchiveResults("error/2018-07-18-19-56-01/") // get err that triggered fatalf
-	expected := "Problem with loading result information: " + errReturned.Error() + " "
-	if !strings.HasSuffix(got[:len(got)-1], expected) {
-		t.Fatalf("Unexpected log message. Got '%s' but should contain '%s'", got[:len(got)-1], expected)
-	}
-
-	// Check that the program exited
-	err := cmd.Wait()
-	if e, ok := err.(*exec.ExitError); !ok || e.Success() {
-		t.Fatalf("Process ran with err %v, want exit status 1", err)
-	}
+	})
 }
 func Test_analyseErrors(t *testing.T) {
+	expectedResults := [][]string{
+		{"172.26.138.91", "kill-session", "kill-session is not a supported operation"},
+		{"172.26.138.92", "delete-config", "delete-config is not a supported operation"},
+		{"172.26.138.93", "kill-session", "kill-session is not a supported operation"},
+		{"172.26.138.94", "delete-config", "delete-config is not a supported operation"},
+	}
+
 	results, ts, err := result.UnarchiveResults("../suite/testdata/results_test/2018-07-18-19-56-01/")
 	if err != nil {
 		t.Error(err)
@@ -77,7 +93,22 @@ func Test_analyseErrors(t *testing.T) {
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 	log.SetOutput(&buff)
 
+	//reading from stdout
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 	analyseErrors(myCmd, ts, results)
+
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+	have := strings.Join(strings.Fields(string(out)), " ") // stdout captured and trim spaces
+
+	assert.Contains(t, have, "HOSTNAME OPERATION MESSAGE ID ERROR")
+	for _, expectedError := range expectedResults {
+		errorsTostring := strings.Join(expectedError, " ")
+		assert.Contains(t, have, errorsTostring) // check errors are printed to stdout
+	}
 
 	got := strings.TrimSpace(buff.String())
 	errLen := strconv.Itoa(len(errors))

@@ -177,6 +177,19 @@ func Test_StringInSlice(t *testing.T) {
 	}
 }
 
+func Test_IsReuseConnection(t *testing.T) {
+	got, err := suite.NewTestSuite("testdata/testsuite.yml")
+	if err != nil {
+		t.Errorf("Problem loading testdata/testsuite.yml: %v", err)
+	}
+	if !got.Configs.IsReuseConnection("10.0.0.2") {
+		t.Errorf("host 10.0.0.2 is set to reuseConnection")
+	}
+	if got.Configs.IsReuseConnection("22.22.22.22") {
+		t.Errorf("host doesnt exist in configs should return false")
+	}
+}
+
 func TestInlineXML(t *testing.T) {
 
 	ts, err := suite.NewTestSuite("testdata/inline.yml")
