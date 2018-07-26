@@ -208,7 +208,8 @@ Testsuite /Users/doneill/scenario1/test-suite.yml started at Tue Jun 19 10:55:33
 Testsuite completed in 22.369465719s
 ```
 
-After completion of a testsuite, an output folder with the date timestamp will be created in a folder called results.
+After completion of a testsuite, an output folder with the date timestamp will be created in a folder called results.  
+This folder contains a csv file summarizing the test run and a copy of the test suite used in the run for archive purposes.
 
 ```sh
 $ ls results
@@ -250,6 +251,30 @@ Total Number of Errors for suite: 2
 
  172.26.138.50  get-config  ssh: handshake failed: ssh: unable to authenticate, attempted methods [none
                             password], no supported methods remain
+```
+
+*Tip* Groups of requests for specific flows can be simulated and tracked. For example to do this:
+In your local machines hosts file (for e.g. /etc/hosts) add hostnames identifying the various groups of requests you want to identify and point them to the same address e.g.
+
+| #IP       | Hostname  | Comment             |
+|-----------|-----------|---------------------|
+| 192.0.0.2 | col_stats | #Collect Statistics |
+| 192.0.0.2 | do_prov   | #Do provisioning    |
+| 192.0.0.2 | adj_amp   | #Adjust Amplifier   |
+
+
+You can then build your test-suite using the newly defined names as hostnames and grouping the commands that typically occur under these processes, when you run your test suite the summary csv will give you additional insight into which operation was done as part of what sequence. 
+
+```sh
+Client  SessionID       MessageID                               Hostname         Operation       When    Err        Latency                                
+0       750             a8db3749-5b11-4e9b-8823-1050bda1ee4e     do_prov         edit-config     2365            841                                    
+0       751             b84f29ba-5f01-474e-9268-c3847b860847     adj_wss         edit-config     5287            2374                                   
+0       753             7f7dec22-8ea2-4f1f-bda3-f9974dbc2775     adj_amp         edit-config     6287            233                                    
+0       752             5acfc9a1-3f4b-42b4-aaed-38d2558e8319     adj_wss         edit-config     7067            2729                                   
+0       754             634f6a40-8f8a-40e8-b363-3121671a02b2     col_stats       get             7492            411                                    
+0       755             50b5ef39-3feb-4020-9c1a-4f42b007b5cd     adj_amp         edit-config     7800            119                                    
+0       755                                                     adj_amp         edit-config     0        session closed by remote side    0      
+0       752                                                     adj_wss         edit-config     0        session closed by remote side    0  
 ```
 
 ## Build
@@ -312,3 +337,4 @@ The design is heavily influenced by [gotling](https://github.com/eriklupander/go
 
 * [Ahmed Keddar](https://github.com/bingobook02)
 * [Patrick Concannon](https://github.com/patrickconcannon)
+* [Frank Kozera](https://github.com/frankkozera)
