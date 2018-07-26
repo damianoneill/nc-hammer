@@ -17,88 +17,92 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
+// Checks the creation of the skeleton testsuite file, and it's default values
 func TestBuildTestSuite(t *testing.T) {
 
 	mockPath := ""
-	got := BuildTestSuite(mockPath)
+	actual := BuildTestSuite(mockPath)
 
-	var want suite.TestSuite
+	var expected suite.TestSuite
 
-	if got.File != mockPath {
-		t.Errorf("Filename: got %v, want %v", got.File, mockPath)
+	if actual.File != mockPath {
+		t.Errorf("Filename: actual %v, expected %v", actual.File, mockPath)
 	}
-	if got.Iterations != 5 {
-		t.Errorf("Iterations: got %v, want %v", got.Iterations, 5)
+	if actual.Iterations != 5 {
+		t.Errorf("Iterations: actual %v, expected %v", actual.Iterations, 5)
 	}
-	if got.Clients != 2 {
-		t.Errorf("Clients: got %v, want %v", got.Clients, 2)
+	if actual.Clients != 2 {
+		t.Errorf("Clients: actual %v, expected %v", actual.Clients, 2)
 	}
-	if got.Rampup != 0 {
-		t.Errorf("Rampup: got %v, want %v", got.Rampup, 0)
+	if actual.Rampup != 0 {
+		t.Errorf("Rampup: actual %v, expected %v", actual.Rampup, 0)
 	}
-	if reflect.ValueOf(got.Configs).Type() != reflect.TypeOf(want.Configs) {
+	if reflect.ValueOf(actual.Configs).Type() != reflect.TypeOf(expected.Configs) {
 		t.Error("Testsuite.Configs is not of type Configs")
 	}
-	if reflect.ValueOf(got.Blocks).Type() != reflect.TypeOf(want.Blocks) {
+	if reflect.ValueOf(actual.Blocks).Type() != reflect.TypeOf(expected.Blocks) {
 		t.Error("Testsuite.Configs is not of type Blocks")
 	}
 }
-func TestInitCmd(t *testing.T) { // check for correct return value
-	var testCmd = InitCmd
-	var cmd = &cobra.Command{}
 
-	testFunc := func(t *testing.T, args []string, want error) {
+// Test to check handling of arguments in InitCmd.Args
+func TestInitCmd(t *testing.T) {
+	var mockCmd = InitCmd
+	var tempCmd = &cobra.Command{}
+
+	testArgs := func(t *testing.T, args []string, expected error) { // args = 1 or != 1
 		t.Helper()
 
-		got := testCmd.Args(cmd, args)
-		assert.Equal(t, got, want)
+		actual := mockCmd.Args(tempCmd, args)
+		assert.Equal(t, actual, expected)
 	}
 
-	t.Run("args != 1", func(t *testing.T) {
-		var a = []string{"x", "y"}
-		testFunc(t, a, errors.New("init command requires a directory as an argument"))
+	t.Run("args == 1", func(t *testing.T) {
+		var mockArgs = []string{"run"}
+		testArgs(t, mockArgs, nil)
 	})
 
-	t.Run("args == 1", func(t *testing.T) {
-		var a = []string{"x"}
-		testFunc(t, a, nil)
+	t.Run("args != 1", func(t *testing.T) {
+		var mockArgs = []string{"run", "error", "test"}
+		testArgs(t, mockArgs, errors.New("init command requires a directory as an argument"))
 	})
 }
 
+// Test checks to see if initial test files and directory are created correctly
 func TestInitRun(t *testing.T) {
-	mockPath := "x"
-	YMLpath := filepath.Join(mockPath, "/test-suite.yml")
-	snippetsPath := filepath.Join(mockPath, "/snippets")
-	XMLpath := filepath.Join(mockPath, "/snippets/edit-config.xml")
+	mockDirPath := "temp_testDir" // create temp directory for files to be outputted to
+	mockYAMLpath := filepath.Join(mockDirPath, "test-suite.yml")
+	mockSnippetsPath := filepath.Join(mockDirPath, "snippets/")
+	mockXMLpath := filepath.Join(mockDirPath, "/snippets/edit-config.xml")
 
-	var testInitCmd = InitCmd
-	var testCmd = &cobra.Command{}
+	var mockCmd = InitCmd
+	var tempCmd = &cobra.Command{}
 
-	args := []string{mockPath}
-	testInitCmd.Run(testCmd, args)
+	args := []string{mockDirPath}
+	mockCmd.Run(tempCmd, args)
 
-	testRun := func(t *testing.T) {
+	testInit := func(t *testing.T) {
 		t.Helper()
 	}
 
-	t.Run("initial load file is valid", func(t *testing.T) {
-		testRun(t)
-		if _, err := os.Stat(mockPath); os.IsNotExist(err) {
-			t.Errorf("\n - File '%v' not found", mockPath)
+	t.Run("check validity of initial load file", func(t *testing.T) {
+		testInit(t)
+		if _, err := os.Stat(mockDirPath); os.IsNotExist(err) {
+			t.Errorf("\n - File '%v' not found", mockDirPath)
 		}
 	})
 
-	t.Run("init files created successfully with correct permissions", func(t *testing.T) {
-		testRun(t)
-		filesToCheck := []string{mockPath, YMLpath, snippetsPath, XMLpath}
+	t.Run("check permissions correctly set on init files", func(t *testing.T) {
+		testInit(t)
+		filesToCheck := []string{mockDirPath, mockYAMLpath, mockSnippetsPath, mockXMLpath}
 
-		for _, n := range filesToCheck {
+		for _, c := range filesToCheck {
 			// check if files exist
-			if _, err := os.Stat(n); os.IsNotExist(err) {
-				t.Errorf("\n - File '%v' not found", n)
+			if _, err := os.Stat(c); os.IsNotExist(err) {
+				t.Errorf("\n - File '%v' not found", c)
 			}
 			// check if init files have correct permissions
-			f, err := os.OpenFile(n, os.O_RDWR, 0666)
+			f, err := os.OpenFile(c, os.O_RDWR, 0666)
 			if err != nil {
 				if os.IsPermission(err) {
 					t.Errorf("\n - %v", err)
@@ -108,52 +112,55 @@ func TestInitRun(t *testing.T) {
 		}
 	})
 
-	t.Run("YML scaffold check", func(t *testing.T) {
-		testRun(t)
+	t.Run("YAML scaffold check", func(t *testing.T) {
+		testInit(t)
 		// create mock YAML using test functions
-		mockTS := BuildTestSuite(YMLpath)
-		mockYML, _ := yaml.Marshal(mockTS)
+		mockTestSuite := BuildTestSuite(mockYAMLpath)
+		expectedYAML, _ := yaml.Marshal(mockTestSuite)
 
 		// read init YAML
-		initYML, _ := ioutil.ReadFile(YMLpath)
+		actualYAML, _ := ioutil.ReadFile(mockYAMLpath)
 
-		c := bytes.Compare(mockYML, initYML) // change for assert.Equal or dirExist
+		c := bytes.Compare(actualYAML, expectedYAML) // change for assert.Equal
 		if c != 0 {
-			t.Error("YML files not equal")
+			t.Error("YAML files not equal")
 		}
 	})
 
 	t.Run("XML scaffold check", func(t *testing.T) {
-		testRun(t)
-		mockXML := []byte("<interface><name>Ethernet0/0</name><mtu>1500</mtu></interface>")
+		testInit(t)
+		expectedXML := []byte("<interface><name>Ethernet0/0</name><mtu>1500</mtu></interface>")
 
 		// read init XML
-		initXML, _ := ioutil.ReadFile(XMLpath)
+		actualXML, _ := ioutil.ReadFile(mockXMLpath)
 
-		c := bytes.Compare(mockXML, initXML) // change for assert.Equal
+		c := bytes.Compare(actualXML, expectedXML) // change for assert.Equal
 		if c != 0 {
 			t.Error("XML files not equal")
 		}
 	})
-	// clean up test files
-	os.RemoveAll(mockPath)
+	// clean up test dir and files
+	os.RemoveAll(mockDirPath)
 }
 
-func TestRunSuccess(t *testing.T) {
-	var testInitCmd = InitCmd
-	var testCmd = &cobra.Command{}
+// Test checks if Init.run runs successfully or not
+func TestInitRunCompletion(t *testing.T) {
+	var mockCmd = InitCmd
+	var tempCmd = &cobra.Command{}
 
-	mockPath := "x"
-	args := []string{mockPath}
+	mockDirPath := "temp_testDir"
+	args := []string{mockDirPath}
 
 	if os.Getenv("RUN_SUBPROCESS") == "1" {
-		testInitCmd.Run(testCmd, args)
+		mockCmd.Run(tempCmd, args)
 		return
 	}
-	cmd := exec.Command(os.Args[0], "-test.run=TestInitRun") // create new process to run test
-	cmd.Env = append(os.Environ(), "RUN_SUBPROCESS=1")       // set environmental variable
-	err := cmd.Run()                                         // run
-	if e, ok := err.(*exec.ExitError); ok && !e.Success() {  // check exit status of test subprocess
+	cmd := exec.Command(os.Args[0], "-test.run=TestInitRunCompletion") // create new process to run test
+	cmd.Env = append(os.Environ(), "RUN_SUBPROCESS=1")                 // set environmental variable
+	err := cmd.Run()                                                   // run
+	if e, ok := err.(*exec.ExitError); ok && !e.Success() {            // check exit status of test subprocess
 		t.Errorf("\n - Exit Status 1 returned\n - File '%v' already exists", args[0])
 	}
+	// clean up test dir and files
+	os.RemoveAll(mockDirPath)
 }

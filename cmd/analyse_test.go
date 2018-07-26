@@ -39,9 +39,9 @@ var (
 	mts7 = result.NetconfResult{Client: 1, SessionID: 80, Hostname: "10.0.0.3", Operation: "-----", When: 0, Err: "----- ----- is not a supported operation", Latency: 0}
 )
 
-func redirectOutput(mockResults []result.NetconfResult) (one string, two string) {
+func redirectOutput(mockResults []result.NetconfResult) (string, string) {
 
-	var fLOG, fCON string
+	var stdErrBuf, stdOutBuf string
 
 	// Redirect StdErr to buffer
 	var logOut = new(bytes.Buffer)
@@ -71,15 +71,15 @@ func redirectOutput(mockResults []result.NetconfResult) (one string, two string)
 
 	// have logOut and consoleOut
 	re := regexp.MustCompile(`\r?\n`)
-	fLOG = strings.Trim(re.ReplaceAllString(logOut.String(), " "), " ")
+	stdErrBuf = strings.Trim(re.ReplaceAllString(logOut.String(), " "), " ")
 
 	// remove formating from table returned by AnalayseResults
 	removeWhtsp := regexp.MustCompile(`^[\s\p{Zs}]+|[\s\p{Zs}]+$`) // remove whitespace outside required string
-	fCON = removeWhtsp.ReplaceAllString(consoleOut, "")
+	stdOutBuf = removeWhtsp.ReplaceAllString(consoleOut, "")
 	removeWhtsp = regexp.MustCompile(`[\s\p{Zs}]{2,}`) // remove whitespace inside required string
-	fCON = removeWhtsp.ReplaceAllString(fCON, " ")
+	stdOutBuf = removeWhtsp.ReplaceAllString(stdOutBuf, " ")
 
-	return fCON, fLOG
+	return stdOutBuf, stdErrBuf
 }
 func TestSortResults(t *testing.T) {
 
@@ -124,12 +124,12 @@ func TestOrderAndExcludeErrValues(t *testing.T) {
 		}
 	}
 
-	t.Run("Exclude zero errors", func(t *testing.T) {
+	t.Run("Return no errors found", func(t *testing.T) {
 		mockResults := []result.NetconfResult{mts1, mts2, mts3, mts4}
 		testOrderExclude(t, mockResults, 0)
 	})
 
-	t.Run("Exclude many errors", func(t *testing.T) {
+	t.Run("Return many errors found", func(t *testing.T) {
 		mockResults := []result.NetconfResult{mts5, mts6, mts7}
 		testOrderExclude(t, mockResults, 3)
 	})
@@ -152,6 +152,7 @@ func TestAnalyseResults(t *testing.T) {
 	t.Run("Check correct output to Stderr", func(t *testing.T) {
 
 		var logBuffer bytes.Buffer
+
 		logBuffer.WriteString("Testsuite executed at " + strings.Split(mockTestSuite.File, string(filepath.Separator))[1] + " Suite defined the following hosts: ")
 		logBuffer.WriteString("[")
 
@@ -177,7 +178,7 @@ func TestAnalyseResults(t *testing.T) {
 		testAnalyse(t, actual, expectedStderr)
 	})
 
-	t.Run("Check for correct output to Stdout -- flags not set", func(t *testing.T) {
+	t.Run("Check for correct output to Stdout - no flags set", func(t *testing.T) {
 
 		var consoleBuffer bytes.Buffer
 		consoleBuffer.WriteString("HOST OPERATION REUSE CONNECTION REQUESTS TPS MEAN VARIANCE STD DEVIATION ")
@@ -194,7 +195,6 @@ func TestAnalyseResults(t *testing.T) {
 				consoleBuffer.WriteString(host + " " + operation + " " + strconv.FormatBool(mockTestSuite.Configs.IsReuseConnection(host)) + " " + strconv.Itoa(len(mockLatencies)) + " " + fmt.Sprintf("%.2f", tps) + " " + fmt.Sprintf("%.2f", mean) + " " + fmt.Sprintf("%.2f", variance) + " " + fmt.Sprintf("%.2f", stddev) + " ")
 			}
 		}
-
 		actual := strings.Trim(consoleBuffer.String(), " ")
 
 		testAnalyse(t, actual, expectedStdout)
@@ -213,15 +213,28 @@ func TestAnalyseResultsWithFlags(t *testing.T) {
 		// reset flags after each test
 		mockCmd.ResetFlags()
 	}
+	t.Run("Check for correct output to Stdout - 'Operation' flag set (get)", func(t *testing.T) {
+		var flag = "operation"
+		mockCmd.Flags().StringVar(&flag, "operation", "get", "")
 
-	t.Run("Operation flag set", func(t *testing.T) {
+		testAnalyseWithFlag(t)
+	})
+
+	t.Run("Check for correct output to Stdout - 'Operation' flag set (get-config)", func(t *testing.T) {
+		var flag = "operation"
+		mockCmd.Flags().StringVar(&flag, "operation", "get-config", "")
+
+		testAnalyseWithFlag(t)
+	})
+
+	t.Run("Check for correct output to Stdout - 'Operation' flag set (edit-config)", func(t *testing.T) {
 		var flag = "operation"
 		mockCmd.Flags().StringVar(&flag, "operation", "edit-config", "")
 
 		testAnalyseWithFlag(t)
 	})
 
-	t.Run("Hostname flag set", func(t *testing.T) {
+	t.Run("Check for correct output to Stdout - 'Hostname' flag set", func(t *testing.T) {
 		var flag = "hostname"
 		mockCmd.Flags().StringVar(&flag, "hostname", "10.0.0.2", "")
 
@@ -229,15 +242,16 @@ func TestAnalyseResultsWithFlags(t *testing.T) {
 	})
 }
 
+// Test to check handling of arguments in AnalyseCmd.Args
 func TestAnalyseCmdArgs(t *testing.T) {
 
 	var testCmd = AnalyseCmd
 	var tempCmd = &cobra.Command{}
 
-	testArgs := func(t *testing.T, args []string, expected error) {
+	testArgs := func(t *testing.T, args []string, expected error) { // args = 1 or != 1
 		t.Helper()
 
-		actual := testCmd.Args(tempCmd, args) // args = 1 or != 1
+		actual := testCmd.Args(tempCmd, args)
 		assert.Equal(t, actual, expected)
 	}
 
@@ -255,15 +269,17 @@ func TestAnalyseCmdArgs(t *testing.T) {
 	})
 }
 
+// Test to check if AnalyseCmd.Run creates the correct output files
 func TestAnalyseCmdRun(t *testing.T) {
 
 	tests := []struct {
-		name     string
-		testCmd  *cobra.Command
-		testArgs []string
+		name        string
+		testCmd     *cobra.Command
+		testArgs    []string
+		invalidPath bool
 	}{
-		// TODO: add more use cases
-		{name: "single valid yaml file", testCmd: &cobra.Command{}, testArgs: []string{"../suite/testdata/results_test/2018-07-18-19-56-01/"}},
+		{name: "valid file path", testCmd: &cobra.Command{}, testArgs: []string{"../suite/testdata/results_test/2018-07-18-19-56-01/"}, invalidPath: false},
+		{name: "invalid file path", testCmd: &cobra.Command{}, testArgs: []string{"invalid/path"}, invalidPath: true},
 	}
 
 	for _, tt := range tests {
@@ -272,12 +288,15 @@ func TestAnalyseCmdRun(t *testing.T) {
 			AnalyseCmd.Run(tt.testCmd, tt.testArgs)
 			return
 		}
-
-		cmd := exec.Command(os.Args[0], "-test.run=TestAnalyseRun") // create new process to run test
-		cmd.Env = append(os.Environ(), "RUN_SUBPROCESS=1")          // set environmental variable
-		err := cmd.Run()                                            // run
-		if e, ok := err.(*exec.ExitError); ok && !e.Success() {     // check exit status of test subprocess
-			t.Fatalf("Program failed to load file -- os.Exit(1)")
+		cmd := exec.Command(os.Args[0], "-test.run=TestAnalyseCmdRun") // create new process to run test
+		cmd.Env = append(os.Environ(), "RUN_SUBPROCESS=1")             // set environmental variable
+		err := cmd.Run()                                               // run
+		if e, ok := err.(*exec.ExitError); ok && !e.Success() {        // check exit status of test subprocess
+			if tt.invalidPath {
+				continue
+			} else {
+				t.Fatalf("Program failed to load file -- os.Exit(1)")
+			}
 		}
 	}
 }
