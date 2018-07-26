@@ -44,7 +44,7 @@ The blocks' configuration contains the defintion of the sequence of requests (an
 
 A sleep Action is a pause in the execution of a block.  The sleep action defines a duration in Milliseconds.
 
-A netconf Action is a definition for a NETCONF operation.  The NETCONF operations that are supported are [get](https://tools.ietf.org/html/rfc6241#page-48), [get-config](https://tools.ietf.org/html/rfc6241#page-35) and [edit-config](https://tools.ietf.org/html/rfc6241#page-37).  The parameters that are available for each netconf action reflect the parameters defined in the [NETCONF Specification](https://tools.ietf.org/html/rfc6241).  
+A netconf Action is a definition for a NETCONF operation or a NETCONF Message.  The NETCONF operations that are supported are [get](https://tools.ietf.org/html/rfc6241#page-48), [get-config](https://tools.ietf.org/html/rfc6241#page-35) and [edit-config](https://tools.ietf.org/html/rfc6241#page-37).  The parameters that are available for each netconf action reflect the parameters defined in the [NETCONF Specification](https://tools.ietf.org/html/rfc6241).  
 
 For e.g. the NETCONF RPC message containing an edit-config operation
 
@@ -66,7 +66,7 @@ For e.g. the NETCONF RPC message containing an edit-config operation
 </rpc>
 ```
 
-maps to the following yaml definition in a testsuite
+maps to the following yaml definition in a testsuite for an operation
 
 ```yaml
 - netconf:
@@ -105,6 +105,24 @@ When running the testsuite the content in the XML file will be inlined as if it 
     target: running
     config: <top xmlns="http://example.com/schema/1.2/config"><protocols><ospf><area><name>0.0.0.0</name><interfaces><interface
       xc:operation="delete"><name>192.0.2.4</name></interface></interfaces></area></ospf></protocols></top>
+```
+
+Support for the Message layer in NETCONF is included to enable proprietary operations.  For e.g. a NETCONF propertiary RPC can be defined as follows:
+
+```yaml
+- netconf:
+    hostname: 10.0.0.1
+    message: rpc
+    method: <some-method><do-stuff/></some-method>
+```
+
+Like the edit-operation config tag the method tag above can use the __file:__ identifier to include a snippet of xml to help with the verbosity of the test-suite.
+
+```yaml
+- netconf:
+    hostname: 10.0.0.1
+    message: rpc
+    method: file:subscribe-method.xml
 ```
 
 A simple response validator is included with the netconf action definition.  This uses [Regex](https://en.wikipedia.org/wiki/Regular_expression) to pattern match on the response payload for a netconf rpc.  The YAML field itself is optional, if populated the regex pattern will be matched against the rpcReply and if unsuccessful will generate an error.  An example of a netconf action defined using the expected response follows:

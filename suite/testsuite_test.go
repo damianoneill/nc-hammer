@@ -60,6 +60,8 @@ func TestNetconf_ToXMLString(t *testing.T) {
 	filterWithNs := suite.Filter{Type: "type", Ns: &ns, Select: "<select/>"}
 	type fields struct {
 		Hostname  string
+		Message   *string
+		Method    *string
 		Operation *string
 		Source    *string
 		Target    *string
@@ -73,20 +75,24 @@ func TestNetconf_ToXMLString(t *testing.T) {
 		wantErr bool
 	}{
 		// TODO: Add test cases.
-		{"valid get-config", fields{"hostname", cmd.StringAddr("get-config"), nil, nil, nil, nil}, "<get-config><source><running/></source></get-config>", false},
-		{"valid get-config candidate source", fields{"hostname", cmd.StringAddr("get-config"), &candidate, nil, nil, nil}, "<get-config><source><candidate/></source></get-config>", false},
-		{"valid get-config filter", fields{"hostname", cmd.StringAddr("get-config"), nil, nil, &filter, nil}, "<get-config><source><running/></source><filter type=\"type\"><select/></filter></get-config>", false},
-		{"valid get-config filter with ns", fields{"hostname", cmd.StringAddr("get-config"), nil, nil, &filterWithNs, nil}, "<get-config><source><running/></source><filter type=\"type\"><top xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><select/></top></filter></get-config>", false},
-		{"not supported kill-session", fields{"hostname", cmd.StringAddr("kill-session"), nil, nil, nil, nil}, "", true},
-		{"valid get", fields{"hostname", cmd.StringAddr("get"), nil, nil, nil, nil}, "<get/>", false},
-		{"valid edit-config", fields{"hostname1", cmd.StringAddr("edit-config"), nil, nil, nil, nil}, "<edit-config><target><running/></target><config/></edit-config>", false},
-		{"valid edit-config2", fields{"hostname2", cmd.StringAddr("edit-config"), nil, &candidate, nil, &editOperation}, "<edit-config><target><candidate/></target><config><top xmlns=\"http://example.com/schema/1.2/config\"><interface><name>Ethernet0/0</name><mtu>1500</mtu></interface></top></config></edit-config>", false},
-		{"valid get with filter", fields{"hostname", cmd.StringAddr("get"), nil, nil, &filter, nil}, "<get><filter type=\"type\"><select/></filter></get>", false},
+		{"valid get-config", fields{"hostname", nil, nil, cmd.StringAddr("get-config"), nil, nil, nil, nil}, "<get-config><source><running/></source></get-config>", false},
+		{"valid get-config candidate source", fields{"hostname", nil, nil, cmd.StringAddr("get-config"), &candidate, nil, nil, nil}, "<get-config><source><candidate/></source></get-config>", false},
+		{"valid get-config filter", fields{"hostname", nil, nil, cmd.StringAddr("get-config"), nil, nil, &filter, nil}, "<get-config><source><running/></source><filter type=\"type\"><select/></filter></get-config>", false},
+		{"valid get-config filter with ns", fields{"hostname", nil, nil, cmd.StringAddr("get-config"), nil, nil, &filterWithNs, nil}, "<get-config><source><running/></source><filter type=\"type\"><top xmlns=\"urn:ietf:params:xml:ns:netconf:base:1.0\"><select/></top></filter></get-config>", false},
+		{"not supported kill-session", fields{"hostname", nil, nil, cmd.StringAddr("kill-session"), nil, nil, nil, nil}, "", true},
+		{"valid get", fields{"hostname", nil, nil, cmd.StringAddr("get"), nil, nil, nil, nil}, "<get/>", false},
+		{"valid edit-config", fields{"hostname1", nil, nil, cmd.StringAddr("edit-config"), nil, nil, nil, nil}, "<edit-config><target><running/></target><config/></edit-config>", false},
+		{"valid edit-config2", fields{"hostname2", nil, nil, cmd.StringAddr("edit-config"), nil, &candidate, nil, &editOperation}, "<edit-config><target><candidate/></target><config><top xmlns=\"http://example.com/schema/1.2/config\"><interface><name>Ethernet0/0</name><mtu>1500</mtu></interface></top></config></edit-config>", false},
+		{"valid get with filter", fields{"hostname", nil, nil, cmd.StringAddr("get"), nil, nil, &filter, nil}, "<get><filter type=\"type\"><select/></filter></get>", false},
+		{"valid rpc", fields{"hostname", cmd.StringAddr("rpc"), cmd.StringAddr("<some-method><!-- method parameters here... --></some-method>"), nil, nil, nil, nil, nil}, "<some-method><!-- method parameters here... --></some-method>", false},
+		{"invalid rpc", fields{"hostname", cmd.StringAddr("rpc"), cmd.StringAddr("-- method parameters here... --></some-method>"), nil, nil, nil, nil, nil}, "", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			n := &suite.Netconf{
 				Hostname:  tt.fields.Hostname,
+				Message:   tt.fields.Message,
+				Method:    tt.fields.Method,
 				Operation: tt.fields.Operation,
 				Source:    tt.fields.Source,
 				Target:    tt.fields.Target,
@@ -208,6 +214,10 @@ func TestInlineXML(t *testing.T) {
 
 	if *ts.Blocks[0].Actions[2].Netconf.Config != inline {
 		t.Errorf("Expected %v got %v", inline, *ts.Blocks[0].Actions[2].Netconf.Config)
+	}
+
+	if *ts.Blocks[0].Actions[3].Netconf.Method != "<get/>" {
+		t.Errorf("Expected %v got %v", "<get/>", *ts.Blocks[0].Actions[3].Netconf.Method)
 	}
 
 }

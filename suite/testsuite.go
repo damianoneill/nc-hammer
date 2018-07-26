@@ -116,30 +116,38 @@ func InlineXML(ts *TestSuite) error {
 	snippets = make(map[string]*string)
 	m := minify.New()
 	m.AddFunc("text/xml", xml.Minify)
+	var err error
 	for _, block := range ts.Blocks {
 		for _, action := range block.Actions {
-			if action.Netconf != nil {
+			switch {
+			case action.Netconf != nil && action.Netconf.Operation != nil:
 				if *action.Netconf.Operation == "edit-config" {
-					if action.Netconf.Config != nil {
-						if strings.HasPrefix(*action.Netconf.Config, "file:") {
-							if _, ok := snippets[*action.Netconf.Config]; !ok {
-								// first time reading file and store in map
-								b, err := readXMLSnippet(strings.SplitAfter(*action.Netconf.Config, "file:")[1])
-								if err != nil {
-									return err
-								}
-								inline, err := m.String("text/xml", string(b))
-								if err != nil {
-									return err
-								}
-								snippets[*action.Netconf.Config] = &inline
-
-							}
-							action.Netconf.Config = snippets[*action.Netconf.Config]
-						}
-					}
+					err = handleSnippet(action.Netconf.Config, m)
 				}
+			case action.Netconf != nil && action.Netconf.Message != nil:
+				err = handleSnippet(action.Netconf.Method, m)
 			}
+		}
+	}
+	return err
+}
+
+func handleSnippet(field *string, m *minify.M) error {
+	if field != nil {
+		if strings.HasPrefix(*field, "file:") {
+			if _, ok := snippets[*field]; !ok {
+				// first time reading file and store in map
+				b, err := readXMLSnippet(strings.SplitAfter(*field, "file:")[1])
+				if err != nil {
+					return err
+				}
+				inline, err := m.String("text/xml", string(b))
+				if err != nil {
+					return err
+				}
+				snippets[*field] = &inline
+			}
+			*field = *snippets[*field]
 		}
 	}
 	return nil
@@ -160,6 +168,35 @@ func readXMLSnippet(filename string) ([]byte, error) {
 // ToXMLString generates a XML representation of the information provided in the Netconf section of the TestSuite
 func (n *Netconf) ToXMLString() (string, error) {
 	doc := etree.NewDocument()
+	var err error
+	switch {
+	case n.Message != nil:
+		err = handleMessage(n, doc)
+	case n.Operation != nil:
+		err = handleOperation(n, doc)
+	}
+	if err != nil {
+		return "", err
+	}
+	return doc.WriteToString()
+}
+
+func handleMessage(n *Netconf, doc *etree.Document) error {
+	switch {
+	case *n.Message == "rpc":
+		method := etree.NewDocument()
+		err := method.ReadFromString(*n.Method)
+		if err != nil || method.Root() == nil {
+			return errors.New("rpc method is not valid xml")
+		}
+		doc.AddChild(method.Root().Copy())
+		return nil
+	default:
+		return errors.New("message layer element not supported")
+	}
+}
+
+func handleOperation(n *Netconf, doc *etree.Document) error {
 	operation := doc.CreateElement(*n.Operation)
 	switch *n.Operation {
 	case "get-config":
@@ -170,8 +207,10 @@ func (n *Netconf) ToXMLString() (string, error) {
 			source.CreateElement("running")
 		}
 		addFilterIfPresent(n, operation)
+		return nil
 	case "get":
 		addFilterIfPresent(n, operation)
+		return nil
 	case "edit-config":
 		source := operation.CreateElement("target")
 		if n.Target != nil {
@@ -188,11 +227,10 @@ func (n *Netconf) ToXMLString() (string, error) {
 			}
 			config.AddChild(inner.Root().Copy())
 		}
+		return nil
 	default:
-		return "", errors.New(*n.Operation + " is not a supported operation")
-
+		return errors.New(*n.Operation + " is not a supported operation")
 	}
-	return doc.WriteToString()
 }
 
 func addFilterIfPresent(n *Netconf, operation *etree.Element) {
@@ -247,15 +285,25 @@ func validateTestSuite(ts *TestSuite) error {
 
 	for _, block := range ts.Blocks {
 		for _, action := range block.Actions {
-			if action.Netconf != nil {
-				if *action.Netconf.Operation == "" {
-					return errors.New("netconf: operation cannot be empty")
-				}
-				if !StringInSlice(action.Netconf.Hostname, hosts) {
-					return errors.New("netconf: operation has to use a host defined in the configs section")
-				}
+			err = validateNetconfAction(action, hosts)
+			if err != nil {
+				return err
 			}
+		}
+	}
+	return nil
+}
 
+func validateNetconfAction(action Action, hosts []string) error {
+	if action.Netconf != nil {
+		if action.Netconf.Operation == nil && action.Netconf.Message == nil {
+			return errors.New("netconf: message or operation should be populated")
+		}
+		if action.Netconf.Message != nil && action.Netconf.Method == nil {
+			return errors.New("netconf: method must be populated when using an netconf message type")
+		}
+		if !StringInSlice(action.Netconf.Hostname, hosts) {
+			return errors.New("netconf: action has to use a host defined in the configs section")
 		}
 	}
 	return nil

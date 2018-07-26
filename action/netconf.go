@@ -26,13 +26,20 @@ func CloseAllSessions() {
 	}
 }
 
+func operationOrMessage(netconf *suite.Netconf) string {
+	if netconf.Operation != nil {
+		return *netconf.Operation
+	}
+	return *netconf.Message
+}
+
 // ExecuteNetconf invoked when a NETCONF Action is identified
 func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *suite.Sshconfig, resultChannel chan result.NetconfResult) {
 
 	var result result.NetconfResult
 	result.Client = cID
 	result.Hostname = action.Netconf.Hostname
-	result.Operation = *action.Netconf.Operation
+	result.Operation = operationOrMessage(action.Netconf)
 
 	session, err := getSession(cID, config.Hostname+":"+strconv.Itoa(config.Port), config.Username, config.Password, config.Reuseconnection)
 	if err != nil {

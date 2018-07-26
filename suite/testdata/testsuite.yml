@@ -44,3 +44,7 @@ blocks:
       hostname: 10.0.0.1
       operation: get-config
       Source: running
+  - netconf:
+      hostname: 10.0.0.1
+      message: rpc
+      method: <get/>

@@ -25,3 +25,7 @@ blocks:
       operation: edit-config
       target: running
       config: file:testdata/edit-config.xml
+  - netconf:
+      hostname: 10.0.0.1
+      message: rpc
+      method: file:testdata/get.xml
