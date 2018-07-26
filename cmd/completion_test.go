@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"errors"
 	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 // helper func to read from stdout, captures completion output
@@ -20,29 +21,20 @@ func readCompletionOutput(err error, args ...string) string {
 	got := strings.TrimSpace(string(out))
 	return got
 }
+
 func Test_completion(t *testing.T) {
-	var err error
+	t.Run("err is not nill", func(t *testing.T) {
+		args := []string{"/etc/bash_completion"} // args triggers err in completion
+		error, _ := CaptureStdout(Completion, myCmd, args)
+		assert.Contains(t, error, "no such file or directory")
+	})
 	t.Run("err is nil", func(t *testing.T) {
+		var err error
 		got := readCompletionOutput(err, "/etc/bash_completion")
 		want := "Bash completion file for " + RootCmd.Use + " saved to " + completionTarget
 		if got != want {
 			t.Errorf("have '%s' but want '%s'", got, want)
 		}
 	})
-	t.Run("error is not nil", func(t *testing.T) {
-		var err = errors.New("my error")
-		got := readCompletionOutput(err, "/etc/bash_completion")
-		want := err.Error()
-		if got != want {
-			t.Errorf("have '%s' but want '%s'", got, want)
-		}
-	})
-}
-func Test_Completion(t *testing.T) {
-	var err error
-	args := []string{""}
-	Completion(completionCmd, args)
-	if err != nil {
-		t.Error()
-	}
+
 }

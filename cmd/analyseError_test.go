@@ -13,10 +13,31 @@ import (
 	"testing"
 
 	"github.com/damianoneill/nc-hammer/result"
+	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 )
 
-var myCmd = analyseErrorCmd
+var myCmd = &cobra.Command{}
+
+type fn func(*cobra.Command, []string)
+
+// helper function to redirect to stdout for xxCmdRun
+func CaptureStdout(runFunction fn, command *cobra.Command, args []string) (string, string) {
+	var buff bytes.Buffer
+	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+	log.SetOutput(&buff)
+	//reading from stdout
+	rescueStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+	runFunction(command, args)
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+	st := strings.Join(strings.Fields(string(out)), " ") // stdout captured, spaces trimmed
+	buf := strings.TrimSpace(buff.String())              // logs captured
+	return st, buf
+}
 
 func Test_AnalyseErrorCmdArgs(t *testing.T) {
 	t.Run("test that a directory is not passed to the command", func(t *testing.T) {
@@ -66,9 +87,8 @@ func Test_AnalyseErrorCmdRun(t *testing.T) {
 	t.Run("test that a correct path is passed as arg", func(t *testing.T) {
 		pathArgs := []string{"../suite/testdata/results_test/2018-07-18-19-56-01/"}
 		_, _, err := result.UnarchiveResults(pathArgs[0])
-		analyseErrorCmd.Run(myCmd, pathArgs)
+		CaptureStdout(analyseErrorCmd.Run, myCmd, pathArgs)
 		assert.Nil(t, err)
-
 	})
 }
 func Test_analyseErrors(t *testing.T) {

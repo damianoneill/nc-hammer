@@ -16,20 +16,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var cmdTest = runCmd
-
 func Test_runCmdArgs(t *testing.T) {
 	t.Run("no args passed to RunCmd test", func(t *testing.T) {
 		args := []string{}
 		errLen := strconv.Itoa(len(args))
-		runCmd.Args(cmdTest, args)
-		assert.Equal(t, runCmd.Args(cmdTest, args), errors.New("run command requires a test suite file as an argument"), "failed"+errLen)
+		runCmd.Args(myCmd, args)
+		assert.Equal(t, runCmd.Args(myCmd, args), errors.New("run command requires a test suite file as an argument"), "failed"+errLen)
 	})
 	t.Run("arg/path passed to RunCmd test ", func(t *testing.T) {
 		args := []string{"../suite/testdata/test-suite.yml"}
 		errLen := strconv.Itoa(len(args))
-		runCmd.Args(cmdTest, args)
-		assert.Equal(t, runCmd.Args(cmdTest, args), nil, "failed"+errLen)
+		runCmd.Args(myCmd, args)
+		assert.Equal(t, runCmd.Args(myCmd, args), nil, "failed"+errLen)
 	})
 }
 
@@ -40,7 +38,7 @@ func Test_runCmdRun(t *testing.T) {
 		if os.Getenv("BE_CRASHER") == "1" {
 			log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 			pathArgs := []string{"error/test-suite.yml"}
-			runCmd.Run(cmdTest, pathArgs)
+			runCmd.Run(myCmd, pathArgs)
 			return
 		}
 
@@ -70,7 +68,7 @@ func Test_runCmdRun(t *testing.T) {
 	t.Run("test that a correct arg is passed", func(t *testing.T) {
 		pathArgs := []string{"../suite/testdata/test-suite.yml"}
 		_, err := suite.NewTestSuite(pathArgs[0])
-		runCmd.Run(cmdTest, pathArgs)
+		CaptureStdout(runCmd.Run, myCmd, pathArgs)
 		assert.Nil(t, err)
 	})
 }
@@ -111,4 +109,7 @@ func Test_runTestSuite(t *testing.T) {
 	// testing runTestSuite output
 	assert.True(t, (strings.Contains(have, "E")) || (strings.Contains(have, ".")))
 	assert.True(t, strings.Contains(got, want))
+	// clean up test files
+	os.RemoveAll("results")
+
 }
