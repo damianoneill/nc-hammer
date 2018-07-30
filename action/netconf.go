@@ -78,9 +78,11 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 	if err != nil {
 		if err.Error() == "WaitForFunc failed" {
 			delete(gSessions, strconv.Itoa(cID)+config.Hostname+":"+strconv.Itoa(config.Port))
+			result.Err = "session closed by remote side"
+		} else {
+			result.Err = err.Error()
 		}
 		fmt.Printf("e")
-		result.Err = "session closed by remote side"
 		resultChannel <- result
 		return
 	}
