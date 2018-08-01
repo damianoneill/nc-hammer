@@ -46,7 +46,7 @@ The host configuration defines the parameters required to make a SSH connection 
   reuseconnection: true  # defaults to false
 ```
 
-Within the Test Suite you can define as many hosts as you require, see the sample [Test Suite](./suite/testdata/testsuite.yml) for examples of this.
+Within the Test Suite you can define as many hosts as you require, see the sample [Test Suite](./suite/testdata/testsuite.yml) for examples of this.  Then when you use the host in an action later, you use the hostname as the identifier for the host configuration defined in this section to be used.
 
 ### Blocks Configuration
 
