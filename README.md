@@ -38,6 +38,16 @@ The host configuration defines the parameters required to make a SSH connection 
 * password (netconf password)
 * reuseconnection (indicates whether a ssh connection against a device should be reused or restablished each time a request is sent)
 
+```yaml
+- hostname: 10.0.0.1      # ip address or dns hostname
+  port: 830               # netconf port
+  username: username
+  password: password
+  reuseconnection: true  # defaults to false
+```
+
+Within the Test Suite you can define as many hosts as you require, see the sample [Test Suite](./suite/testdata/testsuite.yml) for examples of this.
+
 ### Blocks Configuration
 
 The blocks' configuration contains the defintion of the sequence of requests (an action) that should be executed against your SUT.  The blocks section contains a list of block definitions, __the list is executed sequentially per client__.  Each block section defines the type of block it is, options include; init, sequential or concurrent.  The blocks themselves contain a list of actions, currently two action types are supported; netconf and sleep.
@@ -90,7 +100,7 @@ can be referenced in the YAML as
 
 ```yaml
 - netconf:
-    hostname: 10.0.0.1
+    hostname: 10.0.0.2
     operation: edit-config
     target: running
     config: file:edit-config.xml
@@ -100,7 +110,7 @@ When running the testsuite the content in the XML file will be inlined as if it 
 
 ```yaml
 - netconf:
-    hostname: 10.0.0.1
+    hostname: 10.0.0.2
     operation: edit-config
     target: running
     config: <top xmlns="http://example.com/schema/1.2/config"><protocols><ospf><area><name>0.0.0.0</name><interfaces><interface
