@@ -12,6 +12,11 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+// Transport interface used for mockTransport in test
+type Transport interface {
+	netconf.Transport
+}
+
 var gSessions map[string]*netconf.Session
 
 func init() {
@@ -124,12 +129,12 @@ func getSession(client int, hostname, username, password string, reuseConnection
 		if err == nil {
 			gSessions[strconv.Itoa(client)+hostname] = session
 		}
-		return session, nil
+		return session, err
 	}
 	return createNewSession(hostname, username, password)
 }
 
-func createNewSession(hostname, username, password string) (*netconf.Session, error) {
+var createNewSession = func(hostname, username, password string) (*netconf.Session, error) {
 	sshConfig := &ssh.ClientConfig{
 		User:            username,
 		Auth:            []ssh.AuthMethod{ssh.Password(password)},
