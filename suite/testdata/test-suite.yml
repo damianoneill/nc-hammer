@@ -7,13 +7,15 @@ configs:
   username: user
   password: pass
   reuseconnection: true
+  expected: <ok/>
 blocks:
 - type: init
   actions:
   - netconf:
       hostname: 00.00.00.00
       operation: get
-      target: running
+      target: running 
+      expected: <ok/>
   - sleep:
       duration: 5
 - type: concurrent
@@ -26,6 +28,7 @@ blocks:
       hostname: 00.00.00.00
       operation: get
       target: running
+      expected: <ok/>
   - sleep:
       duration: 5
 actions: []
