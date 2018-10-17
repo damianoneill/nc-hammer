@@ -1,26 +1,38 @@
 package action
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
 	"time"
 
-	"github.com/Juniper/go-netconf/netconf"
 	"github.com/damianoneill/nc-hammer/result"
 	"github.com/damianoneill/nc-hammer/suite"
+	"github.com/damianoneill/net/netconf"
 	"golang.org/x/crypto/ssh"
 )
 
-// Transport interface used for mockTransport in test
-type Transport interface {
-	netconf.Transport
+var (
+	diagnosticContext = context.Background()
+)
+
+// CreateDiagnosticContext creates a context used for instantiating new Netconf sessions, with the option
+// of enabling netconf client diagnostics (diagFlag == true).
+func CreateDiagnosticContext(diagFlag bool) {
+	var trace *netconf.ClientTrace
+	if diagFlag {
+		trace = netconf.DiagnosticLoggingHooks
+	} else {
+		trace = netconf.DefaultLoggingHooks
+	}
+	diagnosticContext = netconf.WithClientTrace(diagnosticContext, trace)
 }
 
-var gSessions map[string]*netconf.Session
+var gSessions map[string]netconf.Session
 
 func init() {
-	gSessions = make(map[string]*netconf.Session)
+	gSessions = make(map[string]netconf.Session)
 }
 
 // CloseAllSessions is called on exit to gracefully close the sockets
@@ -61,7 +73,7 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 	}
 
 	if session != nil {
-		result.SessionID = session.SessionID
+		result.SessionID = session.ID()
 	} else {
 		fmt.Printf("E")
 		result.Err = "session has expired"
@@ -77,16 +89,11 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 		return
 	}
 
-	raw := netconf.RawMethod(xml)
+	raw := netconf.Request(xml)
 	start := time.Now()
-	rpcReply, err := session.Exec(raw)
+	rpcReply, err := session.Execute(raw)
 	if err != nil {
-		if err.Error() == "WaitForFunc failed" {
-			delete(gSessions, strconv.Itoa(cID)+config.Hostname+":"+strconv.Itoa(config.Port))
-			result.Err = "session closed by remote side"
-		} else {
-			result.Err = err.Error()
-		}
+		result.Err = err.Error()
 		fmt.Printf("e")
 		resultChannel <- result
 		return
@@ -116,7 +123,7 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 }
 
 // getSession returns a NETCONF Session, either a new one or a pre existing one if resuseConnection is valid for client/host
-func getSession(client int, hostname, username, password string, reuseConnection bool) (*netconf.Session, error) {
+func getSession(client int, hostname, username, password string, reuseConnection bool) (netconf.Session, error) {
 	// check if hostname should reuse connection
 	if reuseConnection {
 		// get Session from Map if present
@@ -134,11 +141,12 @@ func getSession(client int, hostname, username, password string, reuseConnection
 	return createNewSession(hostname, username, password)
 }
 
-var createNewSession = func(hostname, username, password string) (*netconf.Session, error) {
+var createNewSession = func(hostname, username, password string) (netconf.Session, error) {
 	sshConfig := &ssh.ClientConfig{
 		User:            username,
 		Auth:            []ssh.AuthMethod{ssh.Password(password)},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
-	return netconf.DialSSH(hostname, sshConfig)
+
+	return netconf.NewRPCSession(diagnosticContext, sshConfig, hostname)
 }

@@ -2,20 +2,23 @@
 
 
 [[projects]]
-  branch = "master"
-  digest = "1:1c5ee0349158e2077d178c733d1a0d17017ae72d60947fe32b0bfbbf0f69b4da"
-  name = "github.com/Juniper/go-netconf"
-  packages = ["netconf"]
-  pruneopts = "UT"
-  revision = "ecb605886691227fdb469b26675560046ee8bab9"
-
-[[projects]]
   digest = "1:f25dfe4538112147d22e4c8437efbc2e216112bec37277534ffe146935064ea8"
   name = "github.com/beevik/etree"
   packages = ["."]
   pruneopts = "UT"
   revision = "9d7e8feddccb4ed1b8afb54e368bd323d2ff652c"
   version = "v1.0.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5f6aed663396bcee4e1289ccd960193f9bde88c9165979fe06ea3b20ee5e483e"
+  name = "github.com/damianoneill/net"
+  packages = [
+    "netconf",
+    "netconf/rfc6242",
+  ]
+  pruneopts = "UT"
+  revision = "58f2a418a4bb1683523185cbe7b3f4b5bdad67e3"
 
 [[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
@@ -109,12 +112,28 @@
   version = "v1.2.0"
 
 [[projects]]
+  digest = "1:40e195917a951a8bf867cd05de2a46aaf1806c50cf92eebf4c16f78cd196f747"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
   pruneopts = "UT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
 
 [[projects]]
   digest = "1:bd1ae00087d17c5a748660b8e89e1043e1e5479d0fea743352cda2f8dd8c4f84"
@@ -212,7 +231,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:4149698a962789474b8651ad5bea772137e72fe23ee3a8e3c65045bf5c5a3be5"
+  digest = "1:1922d177ca458baf48c2bf730493d9b09df4090c8e478bd0777ae253bf47985b"
   name = "golang.org/x/crypto"
   packages = [
     "curve25519",
@@ -222,7 +241,6 @@
     "internal/subtle",
     "poly1305",
     "ssh",
-    "ssh/agent",
   ]
   pruneopts = "UT"
   revision = "a521dfce2584b08efb1ec3eab94c05254dcf8f09"
@@ -284,8 +302,8 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/Juniper/go-netconf/netconf",
     "github.com/beevik/etree",
+    "github.com/damianoneill/net/netconf",
     "github.com/gocarina/gocsv",
     "github.com/olekukonko/tablewriter",
     "github.com/spf13/cobra",

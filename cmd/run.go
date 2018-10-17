@@ -12,6 +12,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	diagFlag = false
+)
+
 // runCmd represents the run command
 var runCmd = &cobra.Command{
 	Use:   "run <test suite file>",
@@ -32,6 +36,10 @@ var runCmd = &cobra.Command{
 }
 
 func runTestSuite(ts *suite.TestSuite) {
+
+	// Initialise the context used to create netconf sessions, to enable diagnostics if requested.
+	action.CreateDiagnosticContext(diagFlag)
+
 	start := time.Now()
 	log.Printf("Testsuite %v started at %v\n", ts.File, start.Format("Mon Jan _2 15:04:05 2006"))
 	log.Printf(" > %d client(s), %d iterations per client, %d seconds wait between starting each client\n", ts.Clients, ts.Iterations, ts.Rampup)
@@ -101,4 +109,6 @@ func handleBlocks(start time.Time, ts *suite.TestSuite, cID int, clientWg *sync.
 
 func init() {
 	RootCmd.AddCommand(runCmd)
+	runCmd.PersistentFlags().BoolVarP(&diagFlag, "diag", "d", false, "Enable netconf diagnostics")
+
 }
