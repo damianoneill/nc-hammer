@@ -1,3 +1,17 @@
+// Copyright 2018 Andrew Fort
+//
+//    Licensed under the Apache License, Version 2.0 (the "License");
+//    you may not use this file except in compliance with the License.
+//    You may obtain a copy of the License at
+//
+//        http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS,
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//    See the License for the specific language governing permissions and
+//    limitations under the License.
+
 package rfc6242
 
 import (
@@ -27,19 +41,22 @@ type Decoder struct {
 	// Framer.
 	Input io.Reader
 
-	framer     FramerFn
-	s          *bufio.Scanner
-	pr         *io.PipeReader
-	pw         *io.PipeWriter
-	piped      int
-	afterFirst func()
+	framer FramerFn
+	// Pending framer will take effect after end of message has been processed.
+	pendingFramer FramerFn
+
+	s  *bufio.Scanner
+	pr *io.PipeReader
+	pw *io.PipeWriter
+
+	// Defines the number of bytes still to be read from the pipe reader.
+	pipedCount int
 
 	scanErr       error
 	chunkDataLeft uint64 // state
 	bufSize       int    // config
 	anySeen       bool
 	eofOK         bool
-	reading       bool
 }
 
 // NewDecoder creates a new RFC6242 transport framing decoder reading from
@@ -69,23 +86,24 @@ func NewDecoder(input io.Reader, options ...DecoderOption) *Decoder {
 // Read reads from the Decoder's input and copies the data into b,
 // implementing io.Reader.
 func (d *Decoder) Read(b []byte) (n int, err error) {
-	if d.piped > 0 {
+	// Deliver pending data from pipe, if there is any.
+	if d.pipedCount > 0 {
 		n, err = d.pr.Read(b)
-		d.piped -= n
+		d.pipedCount -= n
 	} else if d.s.Scan() {
 		token := d.s.Bytes()
 		if len(token) <= len(b) {
 			copy(b, token)
 			return len(token), nil
 		}
-		d.piped = len(token)
+		d.pipedCount = len(token)
 		go func() {
-			if _, err := d.pw.Write(token); err != nil {
-				d.pr.CloseWithError(err)
+			if _, err = d.pw.Write(token); err != nil {
+				d.pr.CloseWithError(err) // nolint : gosec
 			}
 		}()
 		n, err = d.pr.Read(b)
-		d.piped -= n
+		d.pipedCount -= n
 	} else if err = d.s.Err(); err == nil {
 		if d.eofOK {
 			err = io.EOF
@@ -117,6 +135,23 @@ func (d *Decoder) split(b []byte, eof bool) (a int, t []byte, err error) {
 		return
 	}
 	return d.framer(d, b, eof)
+}
+
+func (d *Decoder) setFramer(f FramerFn) {
+
+	// If we have not yet seen an End of Message, set the new framer as pending, so that it only
+	// takes effect after End of Message is detected.
+	// This allows for the sequence:
+	// - transport reader delivers complete hello message, i.e. <hello>....</hello>
+	// - decoder delivers token (the hello message) to xml decoder
+	// - xml decoder delivers decoded hello to application code
+	// - application code inspects hello, enables chunked framing and calls the xml decoder
+	// - transport reader delivers 'missing' end of message
+	if !d.anySeen {
+		d.pendingFramer = f
+	} else {
+		d.framer = f
+	}
 }
 
 const (

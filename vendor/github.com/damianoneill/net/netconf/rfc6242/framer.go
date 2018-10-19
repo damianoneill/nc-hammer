@@ -1,3 +1,17 @@
+// Copyright 2018 Andrew Fort
+//
+//    Licensed under the Apache License, Version 2.0 (the "License");
+//    you may not use this file except in compliance with the License.
+//    You may obtain a copy of the License at
+//
+//        http://www.apache.org/licenses/LICENSE-2.0
+//
+//    Unless required by applicable law or agreed to in writing, software
+//    distributed under the License is distributed on an "AS IS" BASIS,
+//    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//    See the License for the specific language governing permissions and
+//    limitations under the License.
+
 package rfc6242
 
 import (
@@ -31,6 +45,7 @@ var (
 
 // decoderEndOfMessage is the NETCONF 1.0 end-of-message delimited
 // decoding function.
+// nolint: gocyclo
 func decoderEndOfMessage(d *Decoder, b []byte, atEOF bool) (advance int, token []byte, err error) {
 	d.eofOK = false
 	var i int
@@ -68,6 +83,13 @@ func decoderEndOfMessage(d *Decoder, b []byte, atEOF bool) (advance int, token [
 			// their peer has the appropriate capability (data
 			// contained within token).
 			if d.eofOK = i == len(tokenEOM); d.eofOK {
+
+				// If there is a pending framer, it can now take effect (see comment in decoder setFramer())
+				if d.pendingFramer != nil {
+					d.framer = d.pendingFramer
+					d.pendingFramer = nil
+					return
+				}
 				d.anySeen = true
 				if !atEOF {
 					return
@@ -79,6 +101,7 @@ func decoderEndOfMessage(d *Decoder, b []byte, atEOF bool) (advance int, token [
 }
 
 // decoderChunked is the NETCONF 1.1 chunked framing decoder function.
+// nolint : gocyclo
 func decoderChunked(d *Decoder, b []byte, atEOF bool) (advance int, token []byte, err error) {
 	if d.scanErr != nil {
 		err = d.scanErr
@@ -154,6 +177,7 @@ const (
 	chActionChunk
 )
 
+// nolint : gocyclo
 func detectChunkHeader(b []byte) (action chunkHeaderAction, advance int, chunksize uint64, err error) {
 	// special case short blocks to detect specific errors. we will
 	// never be called with an empty b.
