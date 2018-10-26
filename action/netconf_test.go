@@ -9,13 +9,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/damianoneill/nc-hammer/mocks/github.com/damianoneill/net/netconf"
 	"github.com/damianoneill/nc-hammer/result"
 	"github.com/damianoneill/nc-hammer/suite"
 	"github.com/damianoneill/net/netconf"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-
-	"github.com/damianoneill/nc-hammer/mocks/github.com/damianoneill/net/netconf"
 )
 
 //helper function to capture ExecuteNetconf output
@@ -108,4 +107,25 @@ func Test_NetconfDiagnosticContext(t *testing.T) {
 	assert.Equal(t, netconf.NoOpLoggingHooks, netconf.ContextClientTrace(defaultContext), "Expect default context not to enable diagnostics")
 	assert.Equal(t, netconf.DefaultLoggingHooks, netconf.ContextClientTrace(nonDiagContext), "Expect context not to enable diagnostics")
 	assert.Equal(t, netconf.DiagnosticLoggingHooks, netconf.ContextClientTrace(diagContext), "Expect context to enable diagnostics")
+}
+
+func Test_handleIpv6(t *testing.T) {
+	type args struct {
+		host string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{"valid ip4", args{"127.0.0.1"}, "127.0.0.1"},
+		{"valid ipv6", args{"::1"}, "[::1]"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := handleIpv6(tt.args.host); got != tt.want {
+				t.Errorf("handleIpv6() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }

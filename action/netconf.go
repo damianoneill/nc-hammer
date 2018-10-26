@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/damianoneill/nc-hammer/result"
@@ -15,6 +16,12 @@ import (
 
 var (
 	diagnosticContext = context.Background()
+)
+
+const (
+	colon = ":"
+	left  = "["
+	right = "]"
 )
 
 // CreateDiagnosticContext creates a context used for instantiating new Netconf sessions, with the option
@@ -53,16 +60,16 @@ func operationOrMessage(netconf *suite.Netconf) string {
 // ExecuteNetconf invoked when a NETCONF Action is identified
 func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *suite.Sshconfig, resultChannel chan result.NetconfResult) {
 
-	var result result.NetconfResult
-	result.Client = cID
-	result.Hostname = action.Netconf.Hostname
-	result.Operation = operationOrMessage(action.Netconf)
+	var r result.NetconfResult
+	r.Client = cID
+	r.Hostname = action.Netconf.Hostname
+	r.Operation = operationOrMessage(action.Netconf)
 
-	session, err := getSession(cID, config.Hostname+":"+strconv.Itoa(config.Port), config.Username, config.Password, config.Reuseconnection)
+	session, err := getSession(cID, handleIpv6(config.Hostname)+":"+strconv.Itoa(config.Port), config.Username, config.Password, config.Reuseconnection)
 	if err != nil {
 		fmt.Printf("E")
-		result.Err = err.Error()
-		resultChannel <- result
+		r.Err = err.Error()
+		resultChannel <- r
 		return
 	}
 
@@ -73,19 +80,19 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 	}
 
 	if session != nil {
-		result.SessionID = session.ID()
+		r.SessionID = session.ID()
 	} else {
 		fmt.Printf("E")
-		result.Err = "session has expired"
-		resultChannel <- result
+		r.Err = "session has expired"
+		resultChannel <- r
 		return
 	}
 
 	xml, err := action.Netconf.ToXMLString()
 	if err != nil {
 		fmt.Printf("E")
-		result.Err = err.Error()
-		resultChannel <- result
+		r.Err = err.Error()
+		resultChannel <- r
 		return
 	}
 
@@ -93,33 +100,33 @@ func ExecuteNetconf(tsStart time.Time, cID int, action suite.Action, config *sui
 	start := time.Now()
 	rpcReply, err := session.Execute(raw)
 	if err != nil {
-		result.Err = err.Error()
+		r.Err = err.Error()
 		fmt.Printf("e")
-		resultChannel <- result
+		resultChannel <- r
 		return
 	}
 	elapsed := time.Since(start)
-	result.When = float64(time.Since(tsStart).Nanoseconds() / int64(time.Millisecond))
-	result.Latency = float64(elapsed.Nanoseconds() / int64(time.Millisecond))
+	r.When = float64(time.Since(tsStart).Nanoseconds() / int64(time.Millisecond))
+	r.Latency = float64(elapsed.Nanoseconds() / int64(time.Millisecond))
 
-	result.MessageID = rpcReply.MessageID
+	r.MessageID = rpcReply.MessageID
 
 	if action.Netconf.Expected != nil {
 		match, err := regexp.MatchString(*action.Netconf.Expected, rpcReply.Data)
 		if err != nil {
 			fmt.Printf("E")
-			result.Err = err.Error()
-			resultChannel <- result
+			r.Err = err.Error()
+			resultChannel <- r
 			return
 		}
 		if !match {
 			fmt.Printf("e")
-			result.Err = "expected response did not match, expected: " + *action.Netconf.Expected + " actual: " + rpcReply.Data
-			resultChannel <- result
+			r.Err = "expected response did not match, expected: " + *action.Netconf.Expected + " actual: " + rpcReply.Data
+			resultChannel <- r
 			return
 		}
 	}
-	resultChannel <- result
+	resultChannel <- r
 }
 
 // getSession returns a NETCONF Session, either a new one or a pre existing one if resuseConnection is valid for client/host
@@ -149,4 +156,11 @@ var createNewSession = func(hostname, username, password string) (netconf.Sessio
 	}
 
 	return netconf.NewRPCSession(diagnosticContext, sshConfig, hostname)
+}
+
+func handleIpv6(host string) string {
+	if strings.Contains(host, colon) {
+		return left + host + right
+	}
+	return host
 }
